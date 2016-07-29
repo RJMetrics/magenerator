@@ -2,6 +2,7 @@
 Generate sample Magento store data
 
 Repo Owner: Ben Garvey
+
 Owned by Magento
 
 # Setup
