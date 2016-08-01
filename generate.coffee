@@ -177,10 +177,12 @@ exportOrderItems = (orders) ->
   writeCsv(ORDER_ITEM_FILE, csv)
 
 getRandomDate = (start, end) ->
-  bias = 67
+  min = 0
+  max = 365
+  bias = 10
   influence = 1
+  rand = Math.random() * (max - min) + min
   mix = Math.random() * influence
-  rand = Math.random()
   value = rand * (1 - mix) + (bias * mix)
   date = new Date()
   date.setDate(date.getDate() - value)
