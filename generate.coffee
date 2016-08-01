@@ -177,7 +177,13 @@ exportOrderItems = (orders) ->
   writeCsv(ORDER_ITEM_FILE, csv)
 
 getRandomDate = (start, end) ->
-  date = new Date(randomDate("-365d"))
+  bias = 67
+  influence = 1
+  mix = Math.random() * influence
+  rand = Math.random()
+  value = rand * (1 - mix) + (bias * mix)
+  date = new Date()
+  date.setDate(date.getDate() - value)
   date.toISOString().slice(0, 19).replace('T', ' ');
 
 escapeQuotesForCsv = (str) ->
