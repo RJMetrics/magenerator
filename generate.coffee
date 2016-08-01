@@ -109,27 +109,30 @@ getRandomItem = (list) ->
   return list[index]
 
 getRandomInt = (min, max) ->
-  Math.floor(getRandomFloat(min, max))
+  r = Math.floor(getRandomFloat(min, max))
+  return r
 
 getRandomFloat = (min, max) ->
   (Math.random() * (max - min)) + min
 
 getRandomDec = (min, max) ->
   dec = (Math.random() * (max - min)) + min
-  dec.toPrecision(2)
+  dec.toFixed(2)
 
 getItems = (products, min, max) ->
   totalItems = getRandomInt(min,max)
   items = []
   for index in [0..totalItems]
     item = getRandomItem(products)
+    item.qty_ordered = getRandomInt(1,5)
     items.push(item)
   return items
 
 getCartValue = (items) ->
   total = 0
-  total += (item.base_price * item.qty_ordered) for item in items
-  return total
+  for item in items
+    total += (item.base_price * item.qty_ordered)
+  return total.toFixed(2)
 
 getOrderStatus = () ->
   return "complete"
@@ -174,8 +177,8 @@ exportOrderItems = (orders) ->
   writeCsv(ORDER_ITEM_FILE, csv)
 
 getRandomDate = (start, end) ->
-  date = new Date(randomDate("-365d")*1000)
-  date.toString()
+  date = new Date(randomDate("-365d"))
+  date.toISOString().slice(0, 19).replace('T', ' ');
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
