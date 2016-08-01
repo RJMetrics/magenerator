@@ -17,6 +17,9 @@ ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 
+DATE_BIAS = 10 # [0..100] where 0 = today
+DATE_WINDOW = 365 # Days to extend data into the past
+
 go = () ->
 
   # Generate list of customers
@@ -178,9 +181,10 @@ exportOrderItems = (orders) ->
 
 getRandomDate = (start, end) ->
   min = 0
-  max = 365
-  bias = 10
+  max = DATE_WINDOW
+  bias = DATE_BIAS
   influence = 1
+
   rand = Math.random() * (max - min) + min
   mix = Math.random() * influence
   value = rand * (1 - mix) + (bias * mix)
