@@ -17,6 +17,9 @@ ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 
+DATE_BIAS = 10 # [0..100] where 0 = today
+DATE_WINDOW = 365 # Days to extend data into the past
+
 go = () ->
 
   # Generate list of customers
@@ -177,7 +180,16 @@ exportOrderItems = (orders) ->
   writeCsv(ORDER_ITEM_FILE, csv)
 
 getRandomDate = (start, end) ->
-  date = new Date(randomDate("-365d"))
+  min = 0
+  max = DATE_WINDOW
+  bias = DATE_BIAS
+  influence = 1
+
+  rand = Math.random() * (max - min) + min
+  mix = Math.random() * influence
+  value = rand * (1 - mix) + (bias * mix)
+  date = new Date()
+  date.setDate(date.getDate() - value)
   date.toISOString().slice(0, 19).replace('T', ' ');
 
 escapeQuotesForCsv = (str) ->
