@@ -42,7 +42,7 @@ generateCustomers = (total) ->
   console.log "Generating customers..."
   customers = []
   createdAt = getRandomDate()
-  for index in [0..total]
+  for index in [1..total]
     customer =
       entity_id: index
       email: getRandomEmail()
@@ -54,7 +54,7 @@ generateCustomers = (total) ->
 generateAddresses = (total) ->
   console.log "Generating addresses..."
   addresses = []
-  for index in [0..total]
+  for index in [1..total]
     address =
       entity_id: index
       city: chance.city()
@@ -66,7 +66,7 @@ generateAddresses = (total) ->
 generateProducts = (total) ->
   console.log "Generating products..."
   products = []
-  for index in [0..total]
+  for index in [1..total]
     product =
       entity_id: index
       name: adjNoun().join('-')
@@ -78,7 +78,7 @@ generateProducts = (total) ->
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
   orders = []
-  for index in [0..total]
+  for index in [1..total]
     customer = getRandomItem(customers)
     address = getRandomItem(addresses)
     items = getItems(products, ITEMS_MIN, ITEMS_MAX)
@@ -91,12 +91,12 @@ generateOrders = (total, customers, addresses, products) ->
       status: getOrderStatus()
       customer_email: customer.email
       store_id: 1
-      other_currency_code: CURRENCY
+      order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
       store_name: STORE_NAME
-      updated_at: createdAt
       created_at: createdAt
+      updated_at: createdAt
     orders.push(order)
   return orders
 
