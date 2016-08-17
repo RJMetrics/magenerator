@@ -16,6 +16,7 @@ ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
+COUPONS = chance.unique(chance.hash, 50, {casing: 'upper', length: 5})
 
 DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
@@ -81,12 +82,15 @@ generateOrders = (total, customers, addresses, products) ->
   for index in [1..total]
     customer = getRandomItem(customers)
     address = getRandomItem(addresses)
+    couponCode = getRandomItem(COUPONS)
     items = getItems(products, ITEMS_MIN, ITEMS_MAX)
     createdAt = getRandomDate()
+    grandTotal = getCartValue(items)
+    shippingAmount = getRandomItem([1.99,3.99,6.99])
     order =
       entity_id: index
       items: items
-      grand_total: getCartValue(items)
+      grand_total: grandTotal
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
@@ -95,6 +99,9 @@ generateOrders = (total, customers, addresses, products) ->
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
       store_name: STORE_NAME
+      coupon_code: couponCode
+      base_tax_amount: (0.08 * grandTotal).toFixed(2)
+      base_shipping_amount: shippingAmount
       created_at: createdAt
       updated_at: createdAt
     orders.push(order)
