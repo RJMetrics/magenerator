@@ -45,6 +45,7 @@ Create all the necessary tables:
 CREATE TABLE `customer_entity` (
   `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
   `email` varchar(255) DEFAULT NULL COMMENT 'Email',
+  `group_id` smallint(5) unsigned NOT NULL DEFAULT 0 COMMENT 'Group Id',
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Created At',
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Updated At',
   PRIMARY KEY (`entity_id`)
@@ -104,11 +105,22 @@ PRIMARY KEY (`entity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Order Address';
 ```
 
+```
+CREATE TABLE `customer_group` (
+`customer_group_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Group Id',
+`customer_group_code` varchar(32) DEFAULT NULL COMMENT 'Customer Group Code',
+`tax_class_id` int(10) DEFAULT 0 COMMENT 'Tax Class Id',
+PRIMARY KEY (`customer_group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Customer Group';
+```
+
 Finally, import all csv file into the mysql tables by running the following commands:
 
 ```
+LOAD DATA INFILE 'customer_group.csv' into table magento.customer_group FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'customer_entity.csv' into table magento.customer_entity FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order.csv' into table magento.sales_flat_order FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order_item.csv' into table magento.sales_flat_order_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
 ```
