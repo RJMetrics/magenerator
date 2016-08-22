@@ -6,8 +6,8 @@ adjNoun = require "adj-noun"
 csvString = require "csv-string"
 async = require "async"
 
-TOTAL_CUSTOMERS = 1000
-TOTAL_ADDRESSES = 1000
+TOTAL_CUSTOMERS = 10
+TOTAL_ADDRESSES = 10
 TOTAL_PRODUCTS = 1000
 TOTAL_ORDERS = 1000
 ITEMS_MIN = 1
@@ -80,21 +80,9 @@ generateProducts = (total) ->
       entity_id: index
       name: adjNoun().join('-')
       sku: "s#{index}"
-      base_price: getRandomDec(0, 10)
+      price: getRandomDec(0, 10)
     products.push(product)
   return products
-
-###
-getLumaProducts = () ->
-  fs.createReadStream("data/products.csv")
-    .pipe(csv())
-    .on("data", (data) ->
-        console.log data
-    )
-    .on("end", () ->
-        console.log "done"
-    )
-###
 
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
@@ -155,7 +143,7 @@ getItems = (products, min, max) ->
 getCartValue = (items) ->
   total = 0
   for item in items
-    total += (item.base_price * item.qty_ordered)
+    total += (item.price * item.qty_ordered)
   return total.toFixed(2)
 
 getOrderStatus = () ->
@@ -188,7 +176,7 @@ exportOrderItems = (orders) ->
       orderItem =
         item_id: itemId++
         qty_ordered: getRandomInt(1,5)
-        base_price: item.base_price
+        base_price: item.price
         name: item.name
         order_id: order.entity_id
         sku: item.sku
@@ -214,7 +202,6 @@ getRandomDate = (start, end) ->
   date.toISOString().slice(0, 19).replace('T', ' ');
 
 getProducts = (callback) ->
-  console.log PRODUCT_FILE
   fs.readFile PRODUCT_FILE, 'utf-8', (err, data) ->
     console.log "Loaded product data..."
     products = convertCsvToObjectList(data)
@@ -232,20 +219,17 @@ convertCsvToArray = (str) ->
 # Assumes a header row for attribute names
 convertArrayToObjectList = (arr) ->
   header = arr[0]
-  ob = {}
   list = []
-  for index in [1..100]
+  for index in [1..TOTAL_PRODUCTS]
+    ob = {}
     for headerIndex in [0..header.length-1]
       ob[header[headerIndex]] = arr[index][headerIndex]
     list.push ob
   return list
 
 convertCsvToObjectList = (str) ->
-  console.log str.length
   arr = convertCsvToArray(str)
-  console.log "Items", arr.length
   list = convertArrayToObjectList(arr)
-  console.log list.length
   return list
 
 convertArrayToCsv = (arr, subTableFile) ->
