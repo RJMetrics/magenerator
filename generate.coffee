@@ -3,6 +3,8 @@ randomDate = require "random-date"
 Chance = require "chance"
 chance = new Chance()
 adjNoun = require "adj-noun"
+csvString = require "csv-string"
+async = require "async"
 
 TOTAL_CUSTOMERS = 1000
 TOTAL_ADDRESSES = 1000
@@ -14,13 +16,18 @@ CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
 ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
+PRODUCT_FILE = 'data/products.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 
 DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
 
-go = () ->
+products = []
+
+go = (callback) ->
+
+  console.log "Products = ", products.length
 
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS)
@@ -29,7 +36,8 @@ go = () ->
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
   # Generate a list of products
-  products= generateProducts(TOTAL_PRODUCTS)
+  #products= generateProducts(TOTAL_PRODUCTS)
+  #products = getLumaProducts()
 
   # Make customers buy the things and ship them to locations
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products)
@@ -37,6 +45,7 @@ go = () ->
   # Export all the data to CSV
   exportCustomerData(customers)
   exportOrderData(orders, products, customers, addresses)
+  callback null, 'done'
 
 generateCustomers = (total) ->
   console.log "Generating customers..."
@@ -74,6 +83,18 @@ generateProducts = (total) ->
       base_price: getRandomDec(0, 10)
     products.push(product)
   return products
+
+###
+getLumaProducts = () ->
+  fs.createReadStream("data/products.csv")
+    .pipe(csv())
+    .on("data", (data) ->
+        console.log data
+    )
+    .on("end", () ->
+        console.log "done"
+    )
+###
 
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
@@ -192,11 +213,40 @@ getRandomDate = (start, end) ->
   date.setDate(date.getDate() - value)
   date.toISOString().slice(0, 19).replace('T', ' ');
 
+getProducts = (callback) ->
+  console.log PRODUCT_FILE
+  fs.readFile PRODUCT_FILE, 'utf-8', (err, data) ->
+    console.log "Loaded product data..."
+    products = convertCsvToObjectList(data)
+    callback null, products
+
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
   else
     str
+
+convertCsvToArray = (str) ->
+  return csvString.parse(str)
+
+# Assumes a header row for attribute names
+convertArrayToObjectList = (arr) ->
+  header = arr[0]
+  ob = {}
+  list = []
+  for index in [1..100]
+    for headerIndex in [0..header.length-1]
+      ob[header[headerIndex]] = arr[index][headerIndex]
+    list.push ob
+  return list
+
+convertCsvToObjectList = (str) ->
+  console.log str.length
+  arr = convertCsvToArray(str)
+  console.log "Items", arr.length
+  list = convertArrayToObjectList(arr)
+  console.log list.length
+  return list
 
 convertArrayToCsv = (arr, subTableFile) ->
   csv = "#{getCsvHeader(arr[0])}\n"
@@ -224,5 +274,12 @@ writeCsv = (file, csv) ->
       console.log "Done."
   )
 
-go()
+async.series([
+  getProducts
+  go
+  ],
+  (err, result) ->
+    console.log "Error", err
+    console.log "Complete!"
+)
 
