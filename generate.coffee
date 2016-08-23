@@ -3,12 +3,13 @@ randomDate = require "random-date"
 Chance = require "chance"
 chance = new Chance()
 adjNoun = require "adj-noun"
-csvString = require "csv-string"
+csvParse = require "csv-parse"
 async = require "async"
+require "should"
 
 TOTAL_CUSTOMERS = 10
 TOTAL_ADDRESSES = 10
-TOTAL_PRODUCTS = 1000
+TOTAL_PRODUCTS = 1500
 TOTAL_ORDERS = 1000
 ITEMS_MIN = 1
 ITEMS_MAX = 5
@@ -26,8 +27,6 @@ DATE_WINDOW = 365 # Days to extend data into the past
 products = []
 
 go = (callback) ->
-
-  console.log "Products = ", products.length
 
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS)
@@ -204,8 +203,9 @@ getRandomDate = (start, end) ->
 getProducts = (callback) ->
   fs.readFile PRODUCT_FILE, 'utf-8', (err, data) ->
     console.log "Loaded product data..."
-    products = convertCsvToObjectList(data)
-    callback null, products
+    csvParse data, {delimiter: ','}, (err, result) ->
+      products = convertArrayToObjectList(result)
+      callback null, products
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
