@@ -7,8 +7,8 @@ csvParse = require "csv-parse"
 async = require "async"
 require "should"
 
-TOTAL_CUSTOMERS = 10
-TOTAL_ADDRESSES = 10
+TOTAL_CUSTOMERS = 100
+TOTAL_ADDRESSES = 100
 TOTAL_PRODUCTS = 1500
 TOTAL_ORDERS = 1000
 ITEMS_MIN = 1
@@ -34,17 +34,13 @@ go = (callback) ->
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
-  # Generate a list of products
-  #products= generateProducts(TOTAL_PRODUCTS)
-  #products = getLumaProducts()
-
   # Make customers buy the things and ship them to locations
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products)
 
   # Export all the data to CSV
   exportCustomerData(customers)
   exportOrderData(orders, products, customers, addresses)
-  callback null, 'done'
+  callback null, true
 
 generateCustomers = (total) ->
   console.log "Generating customers..."
@@ -70,18 +66,6 @@ generateAddresses = (total) ->
       country: chance.country({full:true})
     addresses.push(address)
   return addresses
-
-generateProducts = (total) ->
-  console.log "Generating products..."
-  products = []
-  for index in [0..total]
-    product =
-      entity_id: index
-      name: adjNoun().join('-')
-      sku: "s#{index}"
-      price: getRandomDec(0, 10)
-    products.push(product)
-  return products
 
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
@@ -263,7 +247,8 @@ async.series([
   go
   ],
   (err, result) ->
-    console.log "Error", err
+    if err
+      console.log "Something went wrong: #{err}"
     console.log "Complete!"
 )
 
