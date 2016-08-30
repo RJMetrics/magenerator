@@ -2,7 +2,6 @@ fs = require "fs"
 randomDate = require "random-date"
 Chance = require "chance"
 chance = new Chance()
-adjNoun = require "adj-noun"
 csvParse = require "csv-parse"
 async = require "async"
 require "should"
@@ -13,6 +12,7 @@ TOTAL_PRODUCTS = 1500
 TOTAL_ORDERS = 1000
 ITEMS_MIN = 1
 ITEMS_MAX = 5
+CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
 ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
@@ -20,6 +20,17 @@ ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 PRODUCT_FILE = 'data/products.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
+COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
+CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
+                   {id: 2, code: "General"}
+                   {id: 3, code: "Wholesale"}
+                   {id: 4, code: "Retailer"}
+                   {id: 5, code: "US Resellers"}
+                   {id: 6, code: "CA Resellers"}
+                   {id: 7, code: "US High Frequency Purchasers"}
+                   {id: 8, code: "CA High Frequency Purchasers"}
+                   {id: 9, code: "Inactive"}
+                   {id: 10, code: "B2b"}]
 
 DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
@@ -27,6 +38,9 @@ DATE_WINDOW = 365 # Days to extend data into the past
 products = []
 
 go = (callback) ->
+
+  # Generate customer groups
+  customerGroups = generateCustomerGroups()
 
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS)
@@ -38,18 +52,31 @@ go = (callback) ->
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products)
 
   # Export all the data to CSV
+  exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
   exportOrderData(orders, products, customers, addresses)
   callback null, true
+
+generateCustomerGroups = () ->
+  console.log "Generating customers groups..."
+  customerGroups = []
+  for group in CUSTOMER_GROUPS
+    customerGroup =
+      customer_group_id: group.id
+      customer_group_code: group.code
+      tax_class_id: 1
+    customerGroups.push(customerGroup)
+  return customerGroups
 
 generateCustomers = (total) ->
   console.log "Generating customers..."
   customers = []
   createdAt = getRandomDate()
-  for index in [0..total]
+  for index in [1..total]
     customer =
       entity_id: index
       email: getRandomEmail()
+      group_id: getRandomItem(CUSTOMER_GROUPS).id
       created_at: createdAt
       updated_at: createdAt
     customers.push(customer)
@@ -58,7 +85,7 @@ generateCustomers = (total) ->
 generateAddresses = (total) ->
   console.log "Generating addresses..."
   addresses = []
-  for index in [0..total]
+  for index in [1..total]
     address =
       entity_id: index
       city: chance.city()
@@ -70,25 +97,31 @@ generateAddresses = (total) ->
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
   orders = []
-  for index in [0..total]
+  for index in [1..total]
     customer = getRandomItem(customers)
     address = getRandomItem(addresses)
+    couponCode = if chance.bool({likelihood: 10}) then getRandomItem(COUPONS) else null
     items = getItems(products, ITEMS_MIN, ITEMS_MAX)
     createdAt = getRandomDate()
+    grandTotal = getCartValue(items)
+    shippingAmount = getRandomItem([1.99,3.99,6.99])
     order =
       entity_id: index
       items: items
-      grand_total: getCartValue(items)
+      grand_total: grandTotal
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
       store_id: 1
-      other_currency_code: CURRENCY
+      order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
       store_name: STORE_NAME
-      updated_at: createdAt
+      coupon_code: couponCode
+      base_tax_amount: (0.08 * grandTotal).toFixed(2)
+      base_shipping_amount: shippingAmount
       created_at: createdAt
+      updated_at: createdAt
     orders.push(order)
   return orders
 
@@ -131,6 +164,11 @@ getCartValue = (items) ->
 
 getOrderStatus = () ->
   return "complete"
+
+exportCustomerGroups = (customerGroups) ->
+  console.log "Exporting customer group list... "
+  csvData = convertArrayToCsv(customerGroups)
+  writeCsv(CUSTOMER_GROUPS_FILE, csvData)
 
 exportCustomerData = (customers) ->
   console.log "Exporting customer list... "
