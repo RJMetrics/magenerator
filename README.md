@@ -17,8 +17,9 @@ sudo npm install -g coffee-script
 Then in the magenerator directory
 ```
 npm install chance
-npm install adj-noun
 npm install random-date
+npm install csv-parse
+npm install async
 ```
 
 # Running
