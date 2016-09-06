@@ -37,7 +37,7 @@ DATE_WINDOW = 365 # Days to extend data into the past
 
 products = []
 
-go = (callback) ->
+go = (products) ->
 
   # Generate customer groups
   customerGroups = generateCustomerGroups()
@@ -55,7 +55,7 @@ go = (callback) ->
   exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
   exportOrderData(orders, products, customers, addresses)
-  callback null, true
+  console.log "Complete!"
 
 generateCustomerGroups = () ->
   console.log "Generating customers groups..."
@@ -282,11 +282,10 @@ writeCsv = (file, csv) ->
 
 async.series([
   getProducts
-  go
   ],
   (err, result) ->
     if err
       console.log "Something went wrong: #{err}"
-    console.log "Complete!"
+    go(result)
 )
 
