@@ -8,8 +8,8 @@ require "should"
 
 TOTAL_CUSTOMERS = 100
 TOTAL_ADDRESSES = 100
-TOTAL_PRODUCTS = 1500
-TOTAL_ORDERS = 1000
+TOTAL_PRODUCTS = 10
+TOTAL_ORDERS = 10
 ITEMS_MIN = 1
 ITEMS_MAX = 5
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
@@ -36,7 +36,6 @@ DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
 
 go = (products) ->
-
   # Generate customer groups
   customerGroups = generateCustomerGroups()
 
@@ -157,7 +156,7 @@ getItems = (products, min, max) ->
 getCartValue = (items) ->
   total = 0
   for item in items
-    total += (item.price * item.qty_ordered)
+    total += (+item.price * +item.qty_ordered)
   return total.toFixed(2)
 
 getOrderStatus = () ->
@@ -195,7 +194,7 @@ exportOrderItems = (orders) ->
       orderItem =
         item_id: itemId++
         qty_ordered: getRandomInt(1,5)
-        base_price: item.price
+        base_price: +item.price
         name: item.name
         order_id: order.entity_id
         sku: item.sku
@@ -282,8 +281,9 @@ async.series([
   getProducts
   ],
   (err, result) ->
+    products = result[0]
     if err
       console.log "Something went wrong: #{err}"
-    go(result)
+    go(products)
 )
 
