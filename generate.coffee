@@ -35,8 +35,6 @@ CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
 DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
 
-products = []
-
 go = (products) ->
 
   # Generate customer groups
