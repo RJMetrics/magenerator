@@ -2,11 +2,13 @@ fs = require "fs"
 randomDate = require "random-date"
 Chance = require "chance"
 chance = new Chance()
-adjNoun = require "adj-noun"
+csvParse = require "csv-parse"
+async = require "async"
+require "should"
 
-TOTAL_CUSTOMERS = 1000
-TOTAL_ADDRESSES = 1000
-TOTAL_PRODUCTS = 1000
+TOTAL_CUSTOMERS = 100
+TOTAL_ADDRESSES = 100
+TOTAL_PRODUCTS = 100
 TOTAL_ORDERS = 1000
 ITEMS_MIN = 1
 ITEMS_MAX = 5
@@ -15,6 +17,7 @@ CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
 ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
+PRODUCT_FILE = 'data/products.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -32,8 +35,7 @@ CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
 DATE_BIAS = 10 # [0..100] where 0 = today
 DATE_WINDOW = 365 # Days to extend data into the past
 
-go = () ->
-
+go = (products) ->
   # Generate customer groups
   customerGroups = generateCustomerGroups()
 
@@ -43,9 +45,6 @@ go = () ->
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
-  # Generate a list of products
-  products= generateProducts(TOTAL_PRODUCTS)
-
   # Make customers buy the things and ship them to locations
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products)
 
@@ -53,6 +52,7 @@ go = () ->
   exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
   exportOrderData(orders, products, customers, addresses)
+  console.log "Complete!"
 
 generateCustomerGroups = () ->
   console.log "Generating customers groups..."
@@ -90,18 +90,6 @@ generateAddresses = (total) ->
       country: chance.country({full:true})
     addresses.push(address)
   return addresses
-
-generateProducts = (total) ->
-  console.log "Generating products..."
-  products = []
-  for index in [1..total]
-    product =
-      entity_id: index
-      name: adjNoun().join('-')
-      sku: "s#{index}"
-      base_price: getRandomDec(0, 10)
-    products.push(product)
-  return products
 
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
@@ -168,7 +156,7 @@ getItems = (products, min, max) ->
 getCartValue = (items) ->
   total = 0
   for item in items
-    total += (item.base_price * item.qty_ordered)
+    total += (+item.price * +item.qty_ordered)
   return total.toFixed(2)
 
 getOrderStatus = () ->
@@ -206,7 +194,7 @@ exportOrderItems = (orders) ->
       orderItem =
         item_id: itemId++
         qty_ordered: getRandomInt(1,5)
-        base_price: item.base_price
+        base_price: +item.price
         name: item.name
         order_id: order.entity_id
         sku: item.sku
@@ -231,11 +219,37 @@ getRandomDate = (start, end) ->
   date.setDate(date.getDate() - value)
   date.toISOString().slice(0, 19).replace('T', ' ');
 
+getProducts = (callback) ->
+  fs.readFile PRODUCT_FILE, 'utf-8', (err, data) ->
+    console.log "Loaded product data..."
+    csvParse data, {delimiter: ','}, (err, result) ->
+      products = convertArrayToObjectList(result)
+      callback null, products
+
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
   else
     str
+
+convertCsvToArray = (str) ->
+  return csvString.parse(str)
+
+# Assumes a header row for attribute names
+convertArrayToObjectList = (arr) ->
+  header = arr[0]
+  list = []
+  for index in [1..TOTAL_PRODUCTS]
+    ob = {}
+    for headerIndex in [0..header.length-1]
+      ob[header[headerIndex]] = arr[index][headerIndex]
+    list.push ob
+  return list
+
+convertCsvToObjectList = (str) ->
+  arr = convertCsvToArray(str)
+  list = convertArrayToObjectList(arr)
+  return list
 
 convertArrayToCsv = (arr, subTableFile) ->
   csv = "#{getCsvHeader(arr[0])}\n"
@@ -263,5 +277,13 @@ writeCsv = (file, csv) ->
       console.log "Done."
   )
 
-go()
+async.series([
+  getProducts
+  ],
+  (err, result) ->
+    products = result[0]
+    if err
+      console.log "Something went wrong: #{err}"
+    go(products)
+)
 
