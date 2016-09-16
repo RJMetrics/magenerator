@@ -6,10 +6,10 @@ csvParse = require "csv-parse"
 async = require "async"
 require "should"
 
-TOTAL_CUSTOMERS = 100
-TOTAL_ADDRESSES = 100
-TOTAL_PRODUCTS = 100
-TOTAL_ORDERS = 1000
+TOTAL_CUSTOMERS = 300
+TOTAL_ADDRESSES = 300
+TOTAL_PRODUCTS = 200
+TOTAL_ORDERS = 3000
 ITEMS_MIN = 1
 ITEMS_MAX = 5
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
@@ -32,8 +32,8 @@ CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
                    {id: 9, code: "Inactive"}
                    {id: 10, code: "B2b"}]
 
-DATE_BIAS = 10 # [0..100] where 0 = today
-DATE_WINDOW = 365 # Days to extend data into the past
+DATE_BIAS = 3 # [0..100] where 0 = today
+DATE_WINDOW = 1095 # Days to extend data into the past
 
 go = (products) ->
   # Generate customer groups
@@ -68,8 +68,8 @@ generateCustomerGroups = () ->
 generateCustomers = (total) ->
   console.log "Generating customers..."
   customers = []
-  createdAt = getRandomDate()
   for index in [1..total]
+    createdAt = getRandomDate()
     customer =
       entity_id: index
       email: getRandomEmail()
