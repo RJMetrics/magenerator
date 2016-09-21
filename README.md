@@ -1,9 +1,9 @@
 # magenerator
-Generate sample Magento store data
+Generate sample Magento store data for use in our analytics demo
 
-Repo Owner: Ben Garvey
+Contact: Ben Garvey bgarvey@magento.com
 
-Owned by Magento
+License: OSL 3.0
 
 # Setup
 If you don't have node, npm, or coffeescript installed
