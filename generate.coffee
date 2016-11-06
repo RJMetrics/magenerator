@@ -267,7 +267,8 @@ getCsvHeader = (object) ->
 convertToCsv = (object) ->
   csv = ''
   for key, value of object when not Array.isArray(value)
-    csv += "\"#{escapeQuotesForCsv(value)}\","
+    # Write null values as real nulls
+    csv += if value? then "\"#{escapeQuotesForCsv(value)}\"," else ","
   return csv.slice(0,-1)
 
 writeCsv = (file, csv) ->
