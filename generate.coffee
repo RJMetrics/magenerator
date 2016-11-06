@@ -87,7 +87,7 @@ generateAddresses = (total) ->
     address =
       entity_id: index
       city: chance.city()
-      region_id: regions.region_id[chance.state()]
+      region: regions.region_id[chance.state()]
       country_id: chance.country()
     addresses.push(address)
   return addresses
