@@ -5,13 +5,14 @@ chance = new Chance()
 csvParse = require "csv-parse"
 async = require "async"
 require "should"
+regions = require "./lib/region_id.json"
 
-TOTAL_CUSTOMERS = 300
-TOTAL_ADDRESSES = 300
+TOTAL_CUSTOMERS = 100
+TOTAL_ADDRESSES = 100
 TOTAL_PRODUCTS = 200
-TOTAL_ORDERS = 3000
+TOTAL_ORDERS = 100
 ITEMS_MIN = 1
-ITEMS_MAX = 5
+ITEMS_MAX = 10
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
@@ -32,7 +33,7 @@ CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
                    {id: 9, code: "Inactive"}
                    {id: 10, code: "B2b"}]
 
-DATE_BIAS = 3 # [0..100] where 0 = today
+DATE_BIAS = 1 # [0..100] where 0 = today
 DATE_WINDOW = 1095 # Days to extend data into the past
 
 go = (products) ->
@@ -86,8 +87,8 @@ generateAddresses = (total) ->
     address =
       entity_id: index
       city: chance.city()
-      state: chance.state()
-      country: chance.country({full:true})
+      region_id: regions.region_id[chance.state()]
+      country_id: chance.country()
     addresses.push(address)
   return addresses
 
