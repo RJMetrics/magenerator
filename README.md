@@ -57,6 +57,7 @@ CREATE TABLE `customer_entity` (
 CREATE TABLE `sales_flat_order` (
   `entity_id` int UNSIGNED NOT NULL auto_increment COMMENT 'Entity Id' ,
   `grand_total` decimal(12,4) NULL COMMENT 'Grand Total' ,
+  `base_grand_total` decimal(12,4) NULL COMMENT 'Grand Total' ,
   `customer_id` int UNSIGNED NULL COMMENT 'Customer Id' ,
   `status` varchar(32) NULL COMMENT 'Status' ,
   `customer_email` varchar(255) NULL COMMENT 'Customer Email' ,
@@ -100,8 +101,8 @@ KEY `IDX_SALES_FLAT_ORDER_ITEM_ORDER_ID` (`order_id`)
 CREATE TABLE `sales_flat_order_address` (
 `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
 `city` varchar(255) DEFAULT NULL COMMENT 'City',
-`state` varchar(255) DEFAULT NULL COMMENT 'State',
-`country` varchar(255) DEFAULT NULL COMMENT 'Country',
+`region` varchar(255) DEFAULT NULL COMMENT 'Region',
+`country_id` varchar(2) DEFAULT NULL COMMENT 'Country',
 PRIMARY KEY (`entity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Order Address';
 ```
