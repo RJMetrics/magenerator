@@ -57,7 +57,7 @@ CREATE TABLE `customer_entity` (
 CREATE TABLE `sales_flat_order` (
   `entity_id` int UNSIGNED NOT NULL auto_increment COMMENT 'Entity Id' ,
   `grand_total` decimal(12,4) NULL COMMENT 'Grand Total' ,
-  `base_grand_total` decimal(12,4) NULL COMMENT 'Grand Total' ,
+  `base_grand_total` decimal(12,4) NULL COMMENT 'Base Grand Total' ,
   `customer_id` int UNSIGNED NULL COMMENT 'Customer Id' ,
   `status` varchar(32) NULL COMMENT 'Status' ,
   `customer_email` varchar(255) NULL COMMENT 'Customer Email' ,
