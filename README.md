@@ -126,3 +126,9 @@ LOAD DATA INFILE 'sales_flat_order_item.csv' into table magento.sales_flat_order
 LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 
 ```
+
+If you need to load the data into a remote db from a local csv file, use this command
+
+```
+mysql -h {{HOSTNAME}} -P 3306 -u {{USERNAME}}} -p {{DATABASE_NAME}} --local-infile -e "LOAD DATA LOCAL INFILE 'data/sales_flat_order_address.csv' into table {{DATABASE_NAME}}.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES;";
+```
