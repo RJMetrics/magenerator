@@ -7,12 +7,12 @@ async = require "async"
 require "should"
 regions = require "./lib/region_id.json"
 
-TOTAL_CUSTOMERS = 100
-TOTAL_ADDRESSES = 100
+TOTAL_CUSTOMERS = 20000
+TOTAL_ADDRESSES = 20000
 TOTAL_PRODUCTS = 200
-TOTAL_ORDERS = 100
+TOTAL_ORDERS = 30000
 ITEMS_MIN = 1
-ITEMS_MAX = 10
+ITEMS_MAX = 20
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
@@ -204,7 +204,7 @@ exportOrderItems = (orders) ->
         product_id: item.entity_id
         created_at: createdAt
         updated_at: createdAt
-    orderItems.push(orderItem)
+      orderItems.push(orderItem)
   csv = convertArrayToCsv(orderItems)
   writeCsv(ORDER_ITEM_FILE, csv)
 
