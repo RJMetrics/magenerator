@@ -5,7 +5,6 @@ chance = new Chance()
 csvParse = require "csv-parse"
 async = require "async"
 require "should"
-regions = require "./lib/region_id.json"
 
 TOTAL_CUSTOMERS = 20000
 TOTAL_ADDRESSES = 20000
