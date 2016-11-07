@@ -11,7 +11,7 @@ TOTAL_ADDRESSES = 20000
 TOTAL_PRODUCTS = 200
 TOTAL_ORDERS = 30000
 ITEMS_MIN = 1
-ITEMS_MAX = 15
+ITEMS_MAX = 20
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
@@ -106,6 +106,7 @@ generateOrders = (total, customers, addresses, products) ->
       entity_id: index
       items: items
       grand_total: grandTotal
+      base_grand_total: grandTotal
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
@@ -202,7 +203,7 @@ exportOrderItems = (orders) ->
         product_id: item.entity_id
         created_at: createdAt
         updated_at: createdAt
-    orderItems.push(orderItem)
+      orderItems.push(orderItem)
   csv = convertArrayToCsv(orderItems)
   writeCsv(ORDER_ITEM_FILE, csv)
 
@@ -266,7 +267,8 @@ getCsvHeader = (object) ->
 convertToCsv = (object) ->
   csv = ''
   for key, value of object when not Array.isArray(value)
-    csv += "\"#{escapeQuotesForCsv(value)}\","
+    # Write null values as real nulls
+    csv += if value? then "\"#{escapeQuotesForCsv(value)}\"," else ","
   return csv.slice(0,-1)
 
 writeCsv = (file, csv) ->
