@@ -102,6 +102,9 @@ generateOrders = (total, customers, addresses, products) ->
     createdAt = getRandomDate()
     grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
+    discountAmount = 0.00
+    if(couponCode)
+      discountAmount = -1*(getRandomItem([0.05,0.1,0.25])*grandTotal).toFixed(2)
     order =
       entity_id: index
       items: items
@@ -118,6 +121,7 @@ generateOrders = (total, customers, addresses, products) ->
       coupon_code: couponCode
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
+      base_discount_amount: discountAmount
       created_at: createdAt
       updated_at: createdAt
     orders.push(order)
