@@ -105,6 +105,30 @@ generateOrders = (total, customers, addresses, products) ->
     discountAmount = 0.00
     if(couponCode)
       discountAmount = -1*(getRandomItem([0.05,0.1,0.25])*grandTotal).toFixed(2)
+
+
+    #set UTM parameters, whose values are dependent upon each other
+    utmCampaign = 'not set'
+    utmMedium = 'none'
+    if chance.bool({likelihood: 35})
+      utmSource = 'Google'
+      if chance.bool({likelihood: 20})
+        utmMedium = 'cpc'
+        utmCampaign = getRandomItem(['Sale Item Ads','Competitor Keywords','Long Tail Keywords'])
+      else
+        utmMedium = 'organic'
+    else if chance.bool({likelihood: 50})  
+      utmSource = getRandomItem(['Facebook','Twitter'])
+      utmMedium = 'socialmedia'
+    else if chance.bool({likelihood: 20})  
+      utmSource = 'Newsletter'
+      utmMedium = 'email'
+      utmCampaign = getRandomItem(['Holiday Newsletter','Product Update Newsletter','Sale Announcement'])
+    else if chance.bool({likelihood: 10})  
+      utmSource = 'referral'
+    else 
+      utmSource = 'direct'
+    
     order =
       entity_id: index
       items: items
@@ -122,6 +146,9 @@ generateOrders = (total, customers, addresses, products) ->
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
       base_discount_amount: discountAmount
+      utm_source: utmSource
+      utm_medium: utmMedium
+      utm_campaign: utmCampaign
       created_at: createdAt
       updated_at: createdAt
     orders.push(order)
