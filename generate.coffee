@@ -6,10 +6,10 @@ csvParse = require "csv-parse"
 async = require "async"
 require "should"
 
-TOTAL_CUSTOMERS = 20000
-TOTAL_ADDRESSES = 20000
+TOTAL_CUSTOMERS = 10000
+TOTAL_ADDRESSES = 10000
 TOTAL_PRODUCTS = 200
-TOTAL_ORDERS = 30000
+TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
@@ -94,18 +94,20 @@ generateAddresses = (total) ->
 generateOrders = (total, customers, addresses, products) ->
   console.log "Generating orders..."
   orders = []
+  orderCounts = [] #a count of orders by customer_id
   for index in [1..total]
-    customer = getRandomItem(customers)
     address = getRandomItem(addresses)
     couponCode = if chance.bool({likelihood: 10}) then getRandomItem(COUPONS) else null
     items = getItems(products, ITEMS_MIN, ITEMS_MAX)
-    createdAt = getRandomDate()
     grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
     discountAmount = 0.00
     if(couponCode)
       discountAmount = -1*(getRandomItem([0.05,0.1,0.25])*grandTotal).toFixed(2)
-
+    createdAt = getRandomDate()
+    customer = getCustomerToBuy(customers, orderCounts)
+    if customer.created_at > createdAt
+      customer.created_at = createdAt #make sure customer created at or before first order placed
 
     #set UTM parameters, whose values are dependent upon each other
     utmCampaign = 'not set'
@@ -152,7 +154,22 @@ generateOrders = (total, customers, addresses, products) ->
       created_at: createdAt
       updated_at: createdAt
     orders.push(order)
+    orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
+
+getCustomerToBuy = (customers, orderCounts) ->
+  #rather than return a truly random customer, bias toward previous buyers
+  cust = getRandomItem(customers)
+  purchases = if orderCounts[cust.entity_id] then orderCounts[cust.entity_id] else 0;
+  if purchases == 0
+    return cust #make sure each customer gets one purchase to create a baseline
+
+  #among repeat buyers, the more purchases you've made the more likely to be picked (exponentially)
+  #this creates incrementally increasing repeat purchase probability values
+  probability = Math.min(100, (purchases*purchases)) 
+  if chance.bool({likelihood: probability})
+    return cust
+  return getCustomerToBuy(customers, orderCounts) #recursively try another customer
 
 getRandomEmailDomain = () ->
   list = ['gmail', 'yahoo', 'magento', 'hotmail', 'aol']
