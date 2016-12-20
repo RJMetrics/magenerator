@@ -192,7 +192,12 @@ getCartValue = (items) ->
   return total.toFixed(2)
 
 getOrderStatus = () ->
-  return "complete"
+  if chance.bool({likelihood: 83})
+    return "complete" #83% of orders
+  if chance.bool({likelihood: 90})
+    return "processing" #90% of 17% of orders
+  return getRandomItem(['pending','canceled','picked','shipped','picking']) 
+
 
 exportCustomerGroups = (customerGroups) ->
   console.log "Exporting customer group list... "
