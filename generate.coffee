@@ -101,35 +101,10 @@ generateOrders = (total, customers, addresses, products) ->
     items = getItems(products, ITEMS_MIN, ITEMS_MAX)
     grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
-    discountAmount = 0.00
-    if(couponCode)
-      discountAmount = -1*(getRandomItem([0.05,0.1,0.25])*grandTotal).toFixed(2)
+    discountAmount = getDiscountAmount(couponCode, grandTotal)
     createdAt = getRandomDate()
-    customer = getCustomerToBuy(customers, orderCounts)
-    if customer.created_at > createdAt
-      customer.created_at = createdAt #make sure customer created at or before first order placed
-
-    #set UTM parameters, whose values are dependent upon each other
-    utmCampaign = 'not set'
-    utmMedium = 'none'
-    if chance.bool({likelihood: 35})
-      utmSource = 'Google'
-      if chance.bool({likelihood: 20})
-        utmMedium = 'cpc'
-        utmCampaign = getRandomItem(['Sale Item Ads','Competitor Keywords','Long Tail Keywords'])
-      else
-        utmMedium = 'organic'
-    else if chance.bool({likelihood: 50})  
-      utmSource = getRandomItem(['Facebook','Twitter'])
-      utmMedium = 'socialmedia'
-    else if chance.bool({likelihood: 20})  
-      utmSource = 'Newsletter'
-      utmMedium = 'email'
-      utmCampaign = getRandomItem(['Holiday Newsletter','Product Update Newsletter','Sale Announcement'])
-    else if chance.bool({likelihood: 10})  
-      utmSource = 'referral'
-    else 
-      utmSource = 'direct'
+    customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
+    utmParameters = getUtmParameters()
     
     order =
       entity_id: index
@@ -148,16 +123,16 @@ generateOrders = (total, customers, addresses, products) ->
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
       base_discount_amount: discountAmount
-      utm_source: utmSource
-      utm_medium: utmMedium
-      utm_campaign: utmCampaign
+      utm_source: utmParameters.utmSource
+      utm_medium: utmParameters.utmMedium
+      utm_campaign: utmParameters.utmCampaign
       created_at: createdAt
       updated_at: createdAt
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
 
-getCustomerToBuy = (customers, orderCounts) ->
+getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
   #rather than return a truly random customer, bias toward previous buyers
   cust = getRandomItem(customers)
   purchases = if orderCounts[cust.entity_id] then orderCounts[cust.entity_id] else 0;
@@ -168,8 +143,11 @@ getCustomerToBuy = (customers, orderCounts) ->
   #this creates incrementally increasing repeat purchase probability values
   probability = Math.min(100, (purchases*purchases)) 
   if chance.bool({likelihood: probability})
+    #we have a winner -- return cust, but first make sure their created_at date is at or before this purchase
+    if cust.created_at > orderCreatedAt
+      cust.created_at = orderCreatedAt #make sure customer created at or before first order placed
     return cust
-  return getCustomerToBuy(customers, orderCounts) #recursively try another customer
+  return getCustomerToBuyFavoringRepeats(customers, orderCounts) #recursively try another customer
 
 getRandomEmailDomain = () ->
   list = ['gmail', 'yahoo', 'magento', 'hotmail', 'aol']
@@ -193,6 +171,37 @@ getRandomDec = (min, max) ->
   dec = (Math.random() * (max - min)) + min
   dec.toFixed(2)
 
+getDiscountAmount = (couponCode, grandTotal) ->
+  if couponCode
+    discountPercent = getRandomItem([0.05,0.1,0.25])
+    return -1*(discountPercent*grandTotal).toFixed(2)
+  return 0.00
+
+getUtmParameters = () ->
+  #set UTM parameters, whose values are dependent upon each other
+  utmParameters = {}
+  utmParameters.utmCampaign = 'not set'
+  utmParameters.utmMedium = 'none'
+  if chance.bool({likelihood: 35})
+    utmParameters.utmSource = 'Google'
+    if chance.bool({likelihood: 20})
+      utmParameters.utmMedium = 'cpc'
+      utmParameters.utmCampaign = getRandomItem(['Sale Item Ads','Competitor Keywords','Long Tail Keywords'])
+    else
+      utmParameters.utmMedium = 'organic'
+  else if chance.bool({likelihood: 50})  
+    utmParameters.utmSource = getRandomItem(['Facebook','Twitter'])
+    utmParameters.utmMedium = 'socialmedia'
+  else if chance.bool({likelihood: 20})  
+    utmParameters.utmSource = 'Newsletter'
+    utmParameters.utmMedium = 'email'
+    utmParameters.utmCampaign = getRandomItem(['Holiday Newsletter','Product Update Newsletter','Sale Announcement'])
+  else if chance.bool({likelihood: 10})  
+    utmParameters.utmSource = 'referral'
+  else 
+    utmParameters.utmSource = 'direct'
+  return utmParameters
+
 getItems = (products, min, max) ->
   totalItems = getRandomInt(min,max)
   items = []
@@ -209,12 +218,9 @@ getCartValue = (items) ->
   return total.toFixed(2)
 
 getOrderStatus = () ->
-  if chance.bool({likelihood: 83})
-    return "complete" #83% of orders
-  if chance.bool({likelihood: 90})
-    return "processing" #90% of 17% of orders
-  return getRandomItem(['pending','canceled','picked','shipped','picking']) 
-
+  if chance.bool({likelihood: 83}) then "complete" #83% of orders
+  else if chance.bool({likelihood: 90}) then "processing" #90% of 17% of orders
+  else getRandomItem(['pending','canceled','picked','shipped','picking']) 
 
 exportCustomerGroups = (customerGroups) ->
   console.log "Exporting customer group list... "
