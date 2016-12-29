@@ -17,6 +17,7 @@ sudo npm install -g coffee-script
 Then in the magenerator directory
 ```
 npm install chance
+npm install should
 npm install random-date
 npm install csv-parse
 npm install async
@@ -69,6 +70,10 @@ CREATE TABLE `sales_flat_order` (
   `coupon_code` varchar(255) NULL COMMENT 'Coupon Code' ,
   `base_tax_amount` decimal(12,4) NULL COMMENT 'Base Tax Amount' ,
   `base_shipping_amount` decimal(12,4) NULL COMMENT 'Base Shipping Amount' ,
+  `base_discount_amount` decimal(12,4) NULL COMMENT 'Base Discount Amount' ,
+  `utm_source` varchar(255) NULL COMMENT 'UTM Source',
+  `utm_medium` varchar(255) NULL COMMENT 'UTM Medium',
+  `utm_campaign` varchar(255) NULL COMMENT 'UTM Campaign',
   `created_at` timestamp NULL default NULL COMMENT 'Created At' ,
   `updated_at` timestamp NULL default NULL COMMENT 'Updated At' ,
   PRIMARY KEY (`entity_id`),
