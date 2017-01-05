@@ -257,6 +257,7 @@ exportOrderItems = (orders) ->
         base_price: +item.price
         name: item.name
         order_id: order.entity_id
+        parent_item_id: null
         sku: item.sku
         product_type: 'tools'
         product_id: item.entity_id

@@ -92,6 +92,7 @@ CREATE TABLE `sales_flat_order_item` (
 `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Base Price',
 `name` varchar(255) DEFAULT NULL COMMENT 'Name',
 `order_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Order Id',
+`parent_item_id` int(10) unsigned DEFAULT NULL COMMENT 'Parent Item Id',
 `sku` varchar(255) DEFAULT NULL COMMENT 'Sku',
 `product_type` varchar(255) DEFAULT NULL COMMENT 'Product Type',
 `product_id` int(10) unsigned DEFAULT NULL COMMENT 'Product Id',
