@@ -111,6 +111,8 @@ generateOrders = (total, customers, addresses, products) ->
       items: items
       grand_total: grandTotal
       base_grand_total: grandTotal
+      base_discount_amount: null
+      base_subtotal: null
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
