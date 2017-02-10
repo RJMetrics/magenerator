@@ -9,7 +9,7 @@ License: OSL 3.0
 If you have docker installed
 ```
 docker build -t magenerator .
-docker run -v `pwd`/data:/opt/app/data magenerator coffee generate.coffee
+docker run -v $(pwd)/data:/opt/app/data magenerator coffee generate.coffee
 ```
 
 # Setup
