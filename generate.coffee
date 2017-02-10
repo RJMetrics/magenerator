@@ -114,7 +114,6 @@ generateOrders = (total, customers, addresses, products) ->
       base_discount_amount: null
       base_subtotal: null
       customer_id: customer.entity_id
-      customer_group_id: getRandomItem(CUSTOMER_GROUPS).id
       status: getOrderStatus()
       customer_email: customer.email
       store_id: 1
@@ -131,6 +130,7 @@ generateOrders = (total, customers, addresses, products) ->
       utm_campaign: utmParameters.utmCampaign
       created_at: createdAt
       updated_at: createdAt
+      customer_group_id: getRandomItem(CUSTOMER_GROUPS).id
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
