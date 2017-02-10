@@ -114,6 +114,7 @@ generateOrders = (total, customers, addresses, products) ->
       base_discount_amount: null
       base_subtotal: null
       customer_id: customer.entity_id
+      customer_group_id: getRandomItem(CUSTOMER_GROUPS).id
       status: getOrderStatus()
       customer_email: customer.email
       store_id: 1

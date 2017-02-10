@@ -5,6 +5,13 @@ Contact: Ben Garvey bgarvey@magento.com
 
 License: OSL 3.0
 
+# Docker Setup
+If you have docker installed
+```
+docker build -t magenerator .
+docker run -v `pwd`/data:/opt/app/data magenerator coffee generate.coffee
+```
+
 # Setup
 If you don't have node, npm, or coffeescript installed
 ```
