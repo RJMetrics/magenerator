@@ -23,16 +23,12 @@ sudo npm install -g coffee-script
 
 Then in the magenerator directory
 ```
-npm install chance
-npm install should
-npm install random-date
-npm install csv-parse
-npm install async
+npm install
 ```
 
 # Running
 ```
-coffee generate.coffee
+npm run-script generate
 ```
 
 The data files are generated and placed in the data directory
