@@ -255,7 +255,7 @@ exportOrderItems = (orders) ->
     for item in order.items
       createdAt = getRandomDate()
       orderItem =
-        item_id: itemId++
+        item_id: ++itemId
         qty_ordered: getRandomInt(1,5)
         base_price: +item.price
         name: item.name
