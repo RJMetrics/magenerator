@@ -82,6 +82,7 @@ CREATE TABLE `sales_flat_order` (
   `utm_source` varchar(255) NULL COMMENT 'UTM Source',
   `utm_medium` varchar(255) NULL COMMENT 'UTM Medium',
   `utm_campaign` varchar(255) NULL COMMENT 'UTM Campaign',
+  `customer_group_id` smallint(6) NULL COMMENT 'Group Id',
   `created_at` timestamp NULL default NULL COMMENT 'Created At' ,
   `updated_at` timestamp NULL default NULL COMMENT 'Updated At' ,
   PRIMARY KEY (`entity_id`),

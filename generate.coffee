@@ -128,9 +128,9 @@ generateOrders = (total, customers, addresses, products) ->
       utm_source: utmParameters.utmSource
       utm_medium: utmParameters.utmMedium
       utm_campaign: utmParameters.utmCampaign
+      customer_group_id: customer.group_id
       created_at: createdAt
       updated_at: createdAt
-      customer_group_id: getRandomItem(CUSTOMER_GROUPS).id
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
