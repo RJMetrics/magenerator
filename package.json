@@ -1,0 +1,27 @@
+{
+  "name": "magenerator",
+  "version": "1.0.0",
+  "description": "Magento data generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "coffee generate.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RJMetrics/magenerator.git"
+  },
+  "author": "Ben Garvey",
+  "license": "OSL-3.0",
+  "bugs": {
+    "url": "https://github.com/RJMetrics/magenerator/issues"
+  },
+  "homepage": "https://github.com/RJMetrics/magenerator#readme",
+  "dependencies": {
+    "async": "^2.1.4",
+    "chance": "^1.0.4",
+    "csv-parse": "^1.2.0",
+    "random-date": "^0.1.1",
+    "should": "^11.2.0"
+  }
+}
