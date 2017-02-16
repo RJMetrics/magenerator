@@ -9,7 +9,7 @@ require "should"
 TOTAL_CUSTOMERS = 10000
 TOTAL_ADDRESSES = 10000
 TOTAL_PRODUCTS = 200
-TOTAL_ORDERS = 10 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
+TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
