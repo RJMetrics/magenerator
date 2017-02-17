@@ -104,14 +104,14 @@ generateOrders = (total, customers, addresses, products, stores) ->
   for index in [1..total]
     address = getRandomItem(addresses)
     couponCode = if chance.bool({likelihood: 10}) then getRandomItem(COUPONS) else null
-    items = getItems(products, ITEMS_MIN, ITEMS_MAX)
+    store = getRandomItem(stores)
+    items = getItems(products, store, ITEMS_MIN, ITEMS_MAX)
     grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
     discountAmount = getDiscountAmount(couponCode, grandTotal)
     createdAt = getRandomDate()
-    customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
+    customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt, store)
     utmParameters = getUtmParameters()
-    store = getRandomItem(stores)
 
     order =
       entity_id: index
@@ -142,9 +142,10 @@ generateOrders = (total, customers, addresses, products, stores) ->
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
 
-getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
+getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt, store) ->
   #rather than return a truly random customer, bias toward previous buyers
   cust = getRandomItem(customers)
+  cust.store_id = store.store_id
   purchases = if orderCounts[cust.entity_id] then orderCounts[cust.entity_id] else 0;
   if purchases == 0
     return cust #make sure each customer gets one purchase to create a baseline
@@ -157,7 +158,7 @@ getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
     if cust.created_at > orderCreatedAt
       cust.created_at = orderCreatedAt #make sure customer created at or before first order placed
     return cust
-  return getCustomerToBuyFavoringRepeats(customers, orderCounts) #recursively try another customer
+  return getCustomerToBuyFavoringRepeats(customers, orderCounts, null, store) #recursively try another customer
 
 getRandomEmailDomain = () ->
   list = ['gmail', 'yahoo', 'magento', 'hotmail', 'aol']
@@ -212,12 +213,13 @@ getUtmParameters = () ->
     utmParameters.utmSource = 'direct'
   return utmParameters
 
-getItems = (products, min, max) ->
+getItems = (products, store, min, max) ->
   totalItems = getRandomInt(min,max)
   items = []
   for index in [0..totalItems]
     item = getRandomItem(products)
     item.qty_ordered = getRandomInt(1,5)
+    item.store_id = store.store_id
     items.push(item)
   return items
 
@@ -276,6 +278,7 @@ exportOrderItems = (orders) ->
         sku: item.sku
         product_type: 'tools'
         product_id: item.entity_id
+        store_id: item.store_id
         created_at: createdAt
         updated_at: createdAt
       orderItems.push(orderItem)
