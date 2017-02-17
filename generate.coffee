@@ -9,7 +9,7 @@ require "should"
 TOTAL_CUSTOMERS = 10000
 TOTAL_ADDRESSES = 10000
 TOTAL_PRODUCTS = 200
-TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
+TOTAL_ORDERS = 3 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
@@ -127,7 +127,7 @@ generateOrders = (total, customers, addresses, products, stores) ->
       order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
-      store_name: store.name for store in stores when store.store_id is customer.store_id
+      store_name: getStoreById(stores, customer.store_id).name
       coupon_code: couponCode
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
@@ -141,6 +141,10 @@ generateOrders = (total, customers, addresses, products, stores) ->
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
+
+getStoreById = (stores, id) ->
+  for store in stores when store.store_id is id
+    return store
 
 getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
   #rather than return a truly random customer, bias toward previous buyers
