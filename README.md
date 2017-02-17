@@ -51,6 +51,7 @@ CREATE TABLE `customer_entity` (
   `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
   `email` varchar(255) DEFAULT NULL COMMENT 'Email',
   `group_id` smallint(5) unsigned NOT NULL DEFAULT 0 COMMENT 'Group Id',
+  `store_id` smallint(5) unsigned DEFAULT NULL COMMENT 'Store Id',
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Created At',
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Updated At',
   PRIMARY KEY (`entity_id`)
@@ -101,6 +102,7 @@ CREATE TABLE `sales_flat_order_item` (
 `sku` varchar(255) DEFAULT NULL COMMENT 'Sku',
 `product_type` varchar(255) DEFAULT NULL COMMENT 'Product Type',
 `product_id` int(10) unsigned DEFAULT NULL COMMENT 'Product Id',
+`store_id` smallint(5) unsigned DEFAULT NULL COMMENT 'Store Id',
 `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Created At',
 `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Updated At',
 PRIMARY KEY (`item_id`),

@@ -105,12 +105,12 @@ generateOrders = (total, customers, addresses, products, stores) ->
   for index in [1..total]
     address = getRandomItem(addresses)
     couponCode = if chance.bool({likelihood: 10}) then getRandomItem(COUPONS) else null
-    items = getItems(products, ITEMS_MIN, ITEMS_MAX)
+    customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
+    items = getItems(products, customer.store_id, ITEMS_MIN, ITEMS_MAX)
     grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
     discountAmount = getDiscountAmount(couponCode, grandTotal)
     createdAt = getRandomDate()
-    customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
     utmParameters = getUtmParameters()
 
     order =
@@ -155,7 +155,7 @@ getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
 
   #among repeat buyers, the more purchases you've made the more likely to be picked (exponentially)
   #this creates incrementally increasing repeat purchase probability values
-  probability = Math.min(100, (purchases*purchases)) 
+  probability = Math.min(100, (purchases*purchases))
   if chance.bool({likelihood: probability})
     #we have a winner -- return cust, but first make sure their created_at date is at or before this purchase
     if cust.created_at > orderCreatedAt
@@ -216,12 +216,13 @@ getUtmParameters = () ->
     utmParameters.utmSource = 'direct'
   return utmParameters
 
-getItems = (products, min, max) ->
+getItems = (products, storeId, min, max) ->
   totalItems = getRandomInt(min,max)
   items = []
   for index in [0..totalItems]
     item = getRandomItem(products)
     item.qty_ordered = getRandomInt(1,5)
+    item.store_id = storeId
     items.push(item)
   return items
 
@@ -280,6 +281,7 @@ exportOrderItems = (orders) ->
         sku: item.sku
         product_type: 'tools'
         product_id: item.entity_id
+        store_id: item.store_id
         created_at: createdAt
         updated_at: createdAt
       orderItems.push(orderItem)
