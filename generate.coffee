@@ -45,7 +45,7 @@ go = (products) ->
   stores = generateStores(TOTAL_STORES)
 
   # Generate list of customers
-  customers = generateCustomers(TOTAL_CUSTOMERS)
+  customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
@@ -71,7 +71,7 @@ generateCustomerGroups = () ->
     customerGroups.push(customerGroup)
   return customerGroups
 
-generateCustomers = (total) ->
+generateCustomers = (total, stores) ->
   console.log "Generating customers..."
   customers = []
   for index in [1..total]
@@ -80,6 +80,7 @@ generateCustomers = (total) ->
       entity_id: index
       email: getRandomEmail()
       group_id: getRandomItem(CUSTOMER_GROUPS).id
+      store_id: getRandomItem(stores).store_id
       created_at: createdAt
       updated_at: createdAt
     customers.push(customer)
@@ -111,7 +112,6 @@ generateOrders = (total, customers, addresses, products, stores) ->
     createdAt = getRandomDate()
     customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
     utmParameters = getUtmParameters()
-    store = getRandomItem(stores)
 
     order =
       entity_id: index
@@ -123,11 +123,11 @@ generateOrders = (total, customers, addresses, products, stores) ->
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
-      store_id: store.store_id
+      store_id: customer.store_id
       order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
-      store_name: store.name
+      store_name: store.name for store in stores when store.store_id is customer.store_id
       coupon_code: couponCode
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
