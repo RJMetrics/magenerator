@@ -161,7 +161,7 @@ getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
     if cust.created_at > orderCreatedAt
       cust.created_at = orderCreatedAt #make sure customer created at or before first order placed
     return cust
-  return getCustomerToBuyFavoringRepeats(customers, orderCounts, null) #recursively try another customer
+  return getCustomerToBuyFavoringRepeats(customers, orderCounts) #recursively try another customer
 
 getRandomEmailDomain = () ->
   list = ['gmail', 'yahoo', 'magento', 'hotmail', 'aol']
