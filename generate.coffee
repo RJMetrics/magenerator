@@ -12,12 +12,14 @@ TOTAL_PRODUCTS = 200
 TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
+TOTAL_STORES = 5
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
 ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 PRODUCT_FILE = 'data/products.csv'
+STORES_FILE = 'data/core_store.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -39,18 +41,22 @@ go = (products) ->
   # Generate customer groups
   customerGroups = generateCustomerGroups()
 
+  # Generate list of stores
+  stores = generateStores(TOTAL_STORES)
+
   # Generate list of customers
-  customers = generateCustomers(TOTAL_CUSTOMERS)
+  customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
   # Make customers buy the things and ship them to locations
-  orders = generateOrders(TOTAL_ORDERS, customers, addresses, products)
+  orders = generateOrders(TOTAL_ORDERS, customers, addresses, products, stores)
 
   # Export all the data to CSV
   exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
+  exportStores(stores)
   exportOrderData(orders, products, customers, addresses)
   console.log "Complete!"
 
@@ -65,7 +71,7 @@ generateCustomerGroups = () ->
     customerGroups.push(customerGroup)
   return customerGroups
 
-generateCustomers = (total) ->
+generateCustomers = (total, stores) ->
   console.log "Generating customers..."
   customers = []
   for index in [1..total]
@@ -74,6 +80,7 @@ generateCustomers = (total) ->
       entity_id: index
       email: getRandomEmail()
       group_id: getRandomItem(CUSTOMER_GROUPS).id
+      store_id: getRandomItem(stores).store_id
       created_at: createdAt
       updated_at: createdAt
     customers.push(customer)
@@ -91,7 +98,7 @@ generateAddresses = (total) ->
     addresses.push(address)
   return addresses
 
-generateOrders = (total, customers, addresses, products) ->
+generateOrders = (total, customers, addresses, products, stores) ->
   console.log "Generating orders..."
   orders = []
   orderCounts = [] #a count of orders by customer_id
@@ -105,7 +112,7 @@ generateOrders = (total, customers, addresses, products) ->
     createdAt = getRandomDate()
     customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
     utmParameters = getUtmParameters()
-    
+
     order =
       entity_id: index
       items: items
@@ -116,11 +123,11 @@ generateOrders = (total, customers, addresses, products) ->
       customer_id: customer.entity_id
       status: getOrderStatus()
       customer_email: customer.email
-      store_id: 1
+      store_id: customer.store_id
       order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id
-      store_name: STORE_NAME
+      store_name: getStoreById(stores, customer.store_id).name
       coupon_code: couponCode
       base_tax_amount: (0.08 * grandTotal).toFixed(2)
       base_shipping_amount: shippingAmount
@@ -134,6 +141,10 @@ generateOrders = (total, customers, addresses, products) ->
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
+
+getStoreById = (stores, id) ->
+  for store in stores when store.store_id is id
+    return store
 
 getCustomerToBuyFavoringRepeats = (customers, orderCounts, orderCreatedAt) ->
   #rather than return a truly random customer, bias toward previous buyers
@@ -225,6 +236,11 @@ getOrderStatus = () ->
   else if chance.bool({likelihood: 90}) then "processing" #90% of 17% of orders
   else getRandomItem(['pending','canceled','picked','shipped','picking']) 
 
+exportStores = (stores) ->
+  console.log "Exporting store list... "
+  csvData = convertArrayToCsv(stores)
+  writeCsv(STORES_FILE, csvData)
+
 exportCustomerGroups = (customerGroups) ->
   console.log "Exporting customer group list... "
   csvData = convertArrayToCsv(customerGroups)
@@ -289,6 +305,16 @@ getProducts = (callback) ->
     csvParse data, {delimiter: ','}, (err, result) ->
       products = convertArrayToObjectList(result)
       callback null, products
+
+generateStores = (total) ->
+  stores = []
+  for index in [0..total]
+    stores.push(generateStore(index))
+  return stores
+
+generateStore = (id) ->
+  store_id: id
+  name: "#{chance.country({full:true})} Store View"
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
