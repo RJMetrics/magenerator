@@ -124,6 +124,7 @@ generateOrders = (total, customers, addresses, products, stores) ->
       status: getOrderStatus()
       customer_email: customer.email
       store_id: customer.store_id
+      base_currency_code: CURRENCY
       order_currency_code: CURRENCY
       billing_address_id: address.entity_id
       shipping_address_id: address.entity_id

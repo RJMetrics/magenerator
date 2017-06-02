@@ -69,6 +69,7 @@ CREATE TABLE `sales_flat_order` (
   `status` varchar(32) NULL COMMENT 'Status' ,
   `customer_email` varchar(255) NULL COMMENT 'Customer Email' ,
   `store_id` smallint UNSIGNED NULL COMMENT 'Store Id' ,
+  `base_currency_code` varchar(255) NULL COMMENT 'Base Currency Code' ,
   `order_currency_code` varchar(255) NULL COMMENT 'Order Currency Code' ,
   `billing_address_id` int NULL COMMENT 'Billing Address Id' ,
   `shipping_address_id` int NULL COMMENT 'Shipping Address Id' ,
