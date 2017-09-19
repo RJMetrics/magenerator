@@ -138,6 +138,32 @@ PRIMARY KEY (`store_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Core Store';
 ```
 
+```
+CREATE TABLE `company` (
+  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Company ID',
+  `status` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Status',
+  `company_name` varchar(40) DEFAULT NULL COMMENT 'Company Name',
+  `legal_name` varchar(80) DEFAULT NULL COMMENT 'Legal Name',
+  `company_email` varchar(255) DEFAULT NULL COMMENT 'Company Email',
+  `vat_tax_id` varchar(40) DEFAULT NULL COMMENT 'VAT Tax ID',
+  `reseller_id` varchar(40) DEFAULT NULL COMMENT 'Reseller ID',
+  `comment` text COMMENT 'Comment',
+  `street` varchar(40) DEFAULT NULL COMMENT 'Street',
+  `city` varchar(40) DEFAULT NULL COMMENT 'City',
+  `country_id` varchar(2) DEFAULT NULL COMMENT 'Country ID',
+  `region` varchar(40) DEFAULT NULL COMMENT 'Region',
+  `region_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Region Id',
+  `postcode` varchar(30) DEFAULT NULL COMMENT 'Postcode',
+  `telephone` varchar(20) DEFAULT NULL COMMENT 'Telephone',
+  `customer_group_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Customer Group ID',
+  `sales_representative_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Sales Representative ID',
+  `super_user_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Super User ID',
+  `reject_reason` text COMMENT 'Reject Reason',
+  `rejected_at` timestamp NULL DEFAULT NULL COMMENT 'Rejected At'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Company Table';
+```
+
+
 Finally, import all csv file into the mysql tables by running the following commands:
 
 ```
@@ -147,7 +173,7 @@ LOAD DATA INFILE 'core_store.csv' into table magento.core_store FIELDS TERMINATE
 LOAD DATA INFILE 'sales_flat_order.csv' into table magento.sales_flat_order FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order_item.csv' into table magento.sales_flat_order_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
+LOAD DATA INFILE 'company.csv' into table magento.company FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command

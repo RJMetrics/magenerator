@@ -21,7 +21,7 @@ ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 PRODUCT_FILE = 'data/products.csv'
 STORES_FILE = 'data/core_store.csv'
-COMPANIES_FILE = 'data/companies.csv'
+COMPANIES_FILE = 'data/company.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -337,8 +337,28 @@ generateCompanies = (total) ->
   return companies
 
 generateCompany = (id) ->
-  id: id
-  name: "#{capitalize(chance.word())}#{generateCompanySuffix()}"
+  name = "#{capitalize(chance.word())}#{generateCompanySuffix()}"
+  company =
+    entity_id: id
+    status: 0
+    company_name: name
+    legal_name: name
+    company_email: null
+    vat_tax_id: null
+    reseller_id: null
+    comment: null
+    street: null
+    city: null
+    country_id: null
+    region: null
+    region_id: null
+    postcode: null
+    telephone: null
+    customer_group_id: null
+    sales_representative_id: null
+    super_user_id: null
+    reject_reason: null
+    rejected_at: null
 
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
