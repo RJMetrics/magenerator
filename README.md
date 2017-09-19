@@ -184,6 +184,25 @@ CREATE TABLE `quote` (
 
 ```
 
+```
+CREATE TABLE `quote_item` (
+  `item_id` int(10) UNSIGNED NOT NULL COMMENT 'Item Id',
+  `quote_id` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Quote Id',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At',
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated At',
+  `product_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Product Id',
+  `store_id` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Store Id',
+  `is_virtual` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Is Virtual',
+  `sku` varchar(255) DEFAULT NULL COMMENT 'Sku',
+  `name` varchar(255) DEFAULT NULL COMMENT 'Name',
+  `qty` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Qty',
+  `price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Price',
+  `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Base Price',
+  `product_type` varchar(255) DEFAULT NULL COMMENT 'Product Type',
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Quote Item';
+```
+
+
 
 Finally, import all csv file into the mysql tables by running the following commands:
 
@@ -196,6 +215,7 @@ LOAD DATA INFILE 'sales_flat_order_item.csv' into table magento.sales_flat_order
 LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'company.csv' into table magento.company FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'quote.csv' into table magento.quote FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'quote_item.csv' into table magento.quote_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command
