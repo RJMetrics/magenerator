@@ -276,6 +276,9 @@ exportOrderData = (orders, products, customers, addresses) ->
   exportOrderItems(orders)
   exportAddressData(addresses)
 
+getProductType = () ->
+  chance.pickone(["simple","configurable","bundle","downloadable","grouped","virtual"])
+
 exportOrderItems = (orders) ->
   csv = ''
   itemId = 0
@@ -291,7 +294,7 @@ exportOrderItems = (orders) ->
         order_id: order.entity_id
         parent_item_id: null
         sku: item.sku
-        product_type: 'tools'
+        product_type: getProductType()
         product_id: item.entity_id
         store_id: item.store_id
         created_at: createdAt
