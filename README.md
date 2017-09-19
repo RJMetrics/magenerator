@@ -163,6 +163,27 @@ CREATE TABLE `company` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Company Table';
 ```
 
+```
+CREATE TABLE `quote` (
+  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Entity Id',
+  `store_id` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Store Id',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `converted_at` timestamp NULL DEFAULT NULL COMMENT 'Converted At',
+  `is_active` smallint(5) UNSIGNED DEFAULT '1' COMMENT 'Is Active',
+  `is_virtual` smallint(5) UNSIGNED DEFAULT '0' COMMENT 'Is Virtual',
+  `is_multi_shipping` smallint(5) UNSIGNED DEFAULT '0' COMMENT 'Is Multi Shipping',
+  `items_count` int(10) UNSIGNED DEFAULT '0' COMMENT 'Items Count',
+  `items_qty` decimal(12,4) DEFAULT '0.0000' COMMENT 'Items Qty',
+  `grand_total` decimal(12,4) DEFAULT '0.0000' COMMENT 'Grand Total',
+  `base_grand_total` decimal(12,4) DEFAULT '0.0000' COMMENT 'Base Grand Total',
+  `checkout_method` varchar(255) DEFAULT NULL COMMENT 'Checkout Method',
+  `customer_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Customer Id',
+  `coupon_code` varchar(255) DEFAULT NULL COMMENT 'Coupon Code'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Quote';
+
+```
+
 
 Finally, import all csv file into the mysql tables by running the following commands:
 
@@ -174,6 +195,7 @@ LOAD DATA INFILE 'sales_flat_order.csv' into table magento.sales_flat_order FIEL
 LOAD DATA INFILE 'sales_flat_order_item.csv' into table magento.sales_flat_order_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_order_address FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'company.csv' into table magento.company FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'quote.csv' into table magento.quote FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command

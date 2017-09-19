@@ -392,7 +392,7 @@ generateQuote = (id, customer_id) ->
     is_active: null
     is_virtual: null
     is_multi_shipping: null
-    items_count: null
+    items_count: chance.integer({min:1, max: 10})
     items_qty: chance.integer({min:1, max:10})
     grand_total: total
     base_grand_total: total
