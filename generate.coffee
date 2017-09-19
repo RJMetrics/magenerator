@@ -363,16 +363,6 @@ generateCompany = (id) ->
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
 
-generateQuotes = (total, customer_id) ->
-  quotes = []
-  for index in [0..total]
-    quotes.push(generateQuote(index, customer_id))
-  return quote
-
-generateQuote = (id, customer_id) ->
-  id: id
-  customer_id: customer_id
-
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
