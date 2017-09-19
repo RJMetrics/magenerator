@@ -14,6 +14,7 @@ ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
 TOTAL_COMPANIES = 20
+TOTAL_QUOTES = 100
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
@@ -22,6 +23,8 @@ ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 PRODUCT_FILE = 'data/products.csv'
 STORES_FILE = 'data/core_store.csv'
 COMPANIES_FILE = 'data/company.csv'
+QUOTES_FILE = 'data/quote.csv'
+
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -52,6 +55,9 @@ go = (products) ->
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
+  # Generate list of quotes
+  quotes = generateQuotes(TOTAL_QUOTES, customers)
+
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
@@ -61,6 +67,7 @@ go = (products) ->
   # Export all the data to CSV
   exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
+  exportQuotes(quotes)
   exportCompanies(companies)
   exportStores(stores)
   exportOrderData(orders, products, customers, addresses)
@@ -249,6 +256,11 @@ exportCompanies = (companies) ->
   csvData = convertArrayToCsv(companies)
   writeCsv(COMPANIES_FILE, csvData)
 
+exportQuotes = (quotes) ->
+  console.log "Exporting quotes list... "
+  csvData = convertArrayToCsv(quotes)
+  writeCsv(QUOTES_FILE, csvData)
+
 exportStores = (stores) ->
   console.log "Exporting store list... "
   csvData = convertArrayToCsv(stores)
@@ -362,6 +374,31 @@ generateCompany = (id) ->
 
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
+
+generateQuotes = (total, customers) ->
+  quotes = []
+  for index in [0..total]
+    quotes.push(generateQuote(index, chance.pickone(customers).id))
+  return quotes
+
+generateQuote = (id, customer_id) ->
+  total = chance.floating({min:1, max: 1000}).toFixed(2);
+  quote =
+    entity_id: id
+    store_id: null
+    created_at: null
+    updated_at: null
+    converted_at: null
+    is_active: null
+    is_virtual: null
+    is_multi_shipping: null
+    items_count: null
+    items_qty: chance.integer({min:1, max:10})
+    grand_total: total
+    base_grand_total: total
+    checkout_method: null
+    customer_id: customer_id
+    coupon_code: null
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
