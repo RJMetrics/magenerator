@@ -13,6 +13,7 @@ TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow in
 ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
+TOTAL_COMPANIES = 20
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 ORDER_FILE = 'data/sales_flat_order.csv'
@@ -20,6 +21,7 @@ ORDER_ITEM_FILE = 'data/sales_flat_order_item.csv'
 ADDRESS_FILE = 'data/sales_flat_order_address.csv'
 PRODUCT_FILE = 'data/products.csv'
 STORES_FILE = 'data/core_store.csv'
+COMPANIES_FILE = 'data/company.csv'
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -44,6 +46,9 @@ go = (products) ->
   # Generate list of stores
   stores = generateStores(TOTAL_STORES)
 
+  # Generate list of companies
+  companies = generateCompanies(TOTAL_COMPANIES)
+
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
@@ -56,6 +61,7 @@ go = (products) ->
   # Export all the data to CSV
   exportCustomerGroups(customerGroups)
   exportCustomerData(customers)
+  exportCompanies(companies)
   exportStores(stores)
   exportOrderData(orders, products, customers, addresses)
   console.log "Complete!"
@@ -238,6 +244,11 @@ getOrderStatus = () ->
   else if chance.bool({likelihood: 90}) then "processing" #90% of 17% of orders
   else getRandomItem(['pending','canceled','picked','shipped','picking']) 
 
+exportCompanies = (companies) ->
+  console.log "Exporting company list... "
+  csvData = convertArrayToCsv(companies)
+  writeCsv(COMPANIES_FILE, csvData)
+
 exportStores = (stores) ->
   console.log "Exporting store list... "
   csvData = convertArrayToCsv(stores)
@@ -319,6 +330,39 @@ generateStore = (id) ->
   store_id: id
   name: "#{chance.country({full:true})} Store View"
 
+generateCompanies = (total) ->
+  companies = []
+  for index in [0..total]
+    companies.push(generateCompany(index))
+  return companies
+
+generateCompany = (id) ->
+  name = "#{capitalize(chance.word())}#{generateCompanySuffix()}"
+  company =
+    entity_id: id
+    status: 0
+    company_name: name
+    legal_name: name
+    company_email: null
+    vat_tax_id: null
+    reseller_id: null
+    comment: null
+    street: null
+    city: null
+    country_id: null
+    region: null
+    region_id: null
+    postcode: null
+    telephone: null
+    customer_group_id: null
+    sales_representative_id: null
+    super_user_id: null
+    reject_reason: null
+    rejected_at: null
+
+generateCompanySuffix = () ->
+  chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
+
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
@@ -362,6 +406,9 @@ convertToCsv = (object) ->
     # Write null values as real nulls
     csv += if value? then "\"#{escapeQuotesForCsv(value)}\"," else ","
   return csv.slice(0,-1)
+
+capitalize = (str) ->
+  str[0].toUpperCase() + str.slice(1)
 
 writeCsv = (file, csv) ->
   fs.writeFile(file, csv, (err) ->
