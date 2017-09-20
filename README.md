@@ -188,7 +188,7 @@ CREATE TABLE `quote` (
 CREATE TABLE `quote_item` (
   `item_id` int(10) UNSIGNED NOT NULL COMMENT 'Item Id',
   `quote_id` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Quote Id',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At',
+  `created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated At',
   `product_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Product Id',
   `store_id` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Store Id',
@@ -198,7 +198,7 @@ CREATE TABLE `quote_item` (
   `qty` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Qty',
   `price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Price',
   `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Base Price',
-  `product_type` varchar(255) DEFAULT NULL COMMENT 'Product Type',
+  `product_type` varchar(255) DEFAULT NULL COMMENT 'Product Type'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Quote Item';
 ```
 
