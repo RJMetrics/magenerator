@@ -59,7 +59,7 @@ CREATE TABLE `customer_entity` (
 ```
 
 ```
-CREATE TABLE `sales_flat_order` (
+CREATE TABLE `sales_order` (
   `entity_id` int UNSIGNED NOT NULL auto_increment COMMENT 'Entity Id' ,
   `grand_total` decimal(12,4) NULL COMMENT 'Grand Total' ,
   `base_grand_total` decimal(12,4) NULL COMMENT 'Base Grand Total' ,
@@ -93,7 +93,7 @@ CREATE TABLE `sales_flat_order` (
 ```
 
 ```
-CREATE TABLE `sales_flat_order_item` (
+CREATE TABLE `sales_order_item` (
 `item_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Item Id',
 `qty_ordered` decimal(12,4) DEFAULT '0.0000' COMMENT 'Qty Ordered',
 `base_price` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Base Price',
@@ -112,7 +112,7 @@ KEY `IDX_SALES_FLAT_ORDER_ITEM_ORDER_ID` (`order_id`)
 ```
 
 ```
-CREATE TABLE `sales_flat_order_address` (
+CREATE TABLE `sales_order_address` (
 `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
 `city` varchar(255) DEFAULT NULL COMMENT 'City',
 `region` varchar(255) DEFAULT NULL COMMENT 'Region',
