@@ -24,6 +24,7 @@ PRODUCT_FILE = 'data/products.csv'
 STORES_FILE = 'data/core_store.csv'
 COMPANIES_FILE = 'data/company.csv'
 QUOTES_FILE = 'data/quote.csv'
+QUOTE_ITEMS_FILE = 'data/quote_item.csv'
 
 CURRENCY = "$"
 STORE_NAME = "MageMart"
@@ -56,7 +57,9 @@ go = (products) ->
   customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
   # Generate list of quotes
-  quotes = generateQuotes(TOTAL_QUOTES, customers)
+  qResult = generateQuotes(TOTAL_QUOTES, customers, products, stores)
+  quotes = qResult[0]
+  quoteItems = qResult[1]
 
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
@@ -69,6 +72,7 @@ go = (products) ->
   exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
   exportData(CUSTOMER_FILE, customers, "Exporting customer list... ")
   exportData(QUOTES_FILE, quotes, "Exporting quote list... ")
+  exportData(QUOTE_ITEMS_FILE, quoteItems, "Exporting quote item list... ")
   exportData(STORES_FILE, stores, "Exporting store list... ")
   exportOrderData(orders, products, customers, addresses)
   console.log "Complete!"
@@ -261,7 +265,7 @@ exportOrderData = (orders, products, customers, addresses) ->
   csvData = convertArrayToCsv(orders)
   writeCsv(ORDER_FILE, csvData)
   exportOrderItems(orders)
-  exportAddressData(addresses)
+  exportData(ADDRESS_FILE, addresses, "Exporting addresses... ")
 
 getProductType = () ->
   chance.pickone(["simple","configurable","bundle","downloadable","grouped","virtual"])
@@ -353,14 +357,18 @@ generateCompany = (id) ->
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
 
-generateQuotes = (total, customers) ->
+generateQuotes = (total, customers, products, stores) ->
   quotes = []
+  quoteItems = []
   for index in [0..total]
-    quotes.push(generateQuote(index, chance.pickone(customers).id))
-  return quotes
+    result = generateQuote(index, chance.pickone(customers).id, products, stores)
+    quotes.push(result[0])
+    quoteItems = quoteItems.concat(result[1])
+  return [quotes, quoteItems]
 
-generateQuote = (id, customer_id) ->
-  total = chance.floating({min:1, max: 1000}).toFixed(2);
+generateQuote = (id, customer_id, products, stores) ->
+  total = chance.floating({min:1, max: 1000}).toFixed(2)
+  items = generateQuoteItems(id, products, stores)
   quote =
     entity_id: id
     store_id: null
@@ -370,13 +378,39 @@ generateQuote = (id, customer_id) ->
     is_active: null
     is_virtual: null
     is_multi_shipping: null
-    items_count: chance.integer({min:1, max: 10})
-    items_qty: chance.integer({min:1, max:10})
+    items_count: items.length
+    items_qty: items.length
     grand_total: total
     base_grand_total: total
     checkout_method: null
     customer_id: customer_id
     coupon_code: null
+
+  return [quote, items]
+
+generateQuoteItems = (quote_id, products, stores) ->
+  total = chance.integer({min: 1, max: 10})
+  items = []
+  for index in [0..total]
+    item = generateQuoteItem(index, quote_id, chance.pickone(products), chance.pickone(stores))
+    items.push(item)
+  return items
+
+generateQuoteItem = (id, quote_id, product, store) ->
+  price = chance.floating({min: 1, max: 100}).toFixed()
+  item =
+    item_id: id
+    quote_id: quote_id
+    created_at: null
+    updated_at: null
+    product_id: product.entity_id
+    is_virtual: chance.integer({min: 0, max: 1})
+    sku: product.sku
+    name: product.name
+    qty: chance.integer(min: 1, max: 100)
+    price: price
+    base_price: price
+    product_type: product.product_type
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
