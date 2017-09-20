@@ -65,11 +65,11 @@ go = (products) ->
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products, stores)
 
   # Export all the data to CSV
-  exportCustomerGroups(customerGroups)
-  exportCustomerData(customers)
-  exportQuotes(quotes)
-  exportCompanies(companies)
-  exportStores(stores)
+  exportData(COMPANIES_FILE, companies, "Exporting company list... ")
+  exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
+  exportData(CUSTOMER_FILE, customers, "Exporting customer list... ")
+  exportData(QUOTES_FILE, quotes, "Exporting quote list... ")
+  exportData(STORES_FILE, stores, "Exporting store list... ")
   exportOrderData(orders, products, customers, addresses)
   console.log "Complete!"
 
@@ -251,35 +251,10 @@ getOrderStatus = () ->
   else if chance.bool({likelihood: 90}) then "processing" #90% of 17% of orders
   else getRandomItem(['pending','canceled','picked','shipped','picking']) 
 
-exportCompanies = (companies) ->
-  console.log "Exporting company list... "
-  csvData = convertArrayToCsv(companies)
-  writeCsv(COMPANIES_FILE, csvData)
-
-exportQuotes = (quotes) ->
-  console.log "Exporting quotes list... "
-  csvData = convertArrayToCsv(quotes)
-  writeCsv(QUOTES_FILE, csvData)
-
-exportStores = (stores) ->
-  console.log "Exporting store list... "
-  csvData = convertArrayToCsv(stores)
-  writeCsv(STORES_FILE, csvData)
-
-exportCustomerGroups = (customerGroups) ->
-  console.log "Exporting customer group list... "
-  csvData = convertArrayToCsv(customerGroups)
-  writeCsv(CUSTOMER_GROUPS_FILE, csvData)
-
-exportCustomerData = (customers) ->
-  console.log "Exporting customer list... "
-  csvData = convertArrayToCsv(customers)
-  writeCsv(CUSTOMER_FILE, csvData)
-
-exportAddressData = (addresses) ->
-  console.log "Exporting addresses... "
-  csvData = convertArrayToCsv(addresses)
-  writeCsv(ADDRESS_FILE, csvData)
+exportData = (path, data, msg) ->
+  console.log msg
+  csvData = convertArrayToCsv(data)
+  writeCsv(path, csvData)
 
 exportOrderData = (orders, products, customers, addresses) ->
   console.log "Exporting orders... "
