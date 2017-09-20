@@ -167,7 +167,7 @@ CREATE TABLE `company` (
 CREATE TABLE `quote` (
   `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Entity Id',
   `store_id` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Store Id',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At',
+  `created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `converted_at` timestamp NULL DEFAULT NULL COMMENT 'Converted At',
   `is_active` smallint(5) UNSIGNED DEFAULT '1' COMMENT 'Is Active',
