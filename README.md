@@ -252,10 +252,7 @@ CREATE TABLE `catalog_category_product` (
 ```
 CREATE TABLE `catalog_category_entity` (
 `entity_id` int(10) unsigned NOT NULL COMMENT 'Entity Id',
-`entity_type_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Type Id',
-`attribute_set_id` int(10) unsigned DEFAULT NULL COMMENT 'Attribute Set Id',
 `parent_id` int(10) unsigned DEFAULT NULL COMMENT 'Parent Id',
-`position` int(5) unsigned DEFAULT NULL COMMENT 'Position',
 `level` int(5) unsigned DEFAULT NULL COMMENT 'Level',
 `path` varchar(32) DEFAULT NULL COMMENT 'Path',
 `created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
@@ -268,9 +265,7 @@ CREATE TABLE `catalog_category_entity` (
 ```
 CREATE TABLE `catalog_category_entity_varchar` (
 `value_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Value Id',
-`entity_type_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Type Id',
 `attribute_id` int(10) unsigned DEFAULT NULL COMMENT 'Attribute Id',
-`store_id` int(10) unsigned DEFAULT NULL COMMENT 'Store Id',
 `entity_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Id',
 `value` varchar(100) DEFAULT NULL COMMENT 'Value',
   PRIMARY KEY (`value_id`),
