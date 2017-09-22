@@ -229,6 +229,54 @@ CREATE TABLE `enterprise_rma_item` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Enterprise Rma Item';
 ```
 
+```
+CREATE TABLE `catalog_product_entity` (
+ `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Entity ID',
+`sku` varchar(255) DEFAULT NULL COMMENT 'Sku',
+`created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
+`updated_at` timestamp NULL DEFAULT NULL COMMENT 'Updated At',
+  PRIMARY KEY (`entity_id`),
+  KEY `IDX_catalog_product_entity_ENTITY_ID` (`entity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Catalog Product Entity';
+```
+
+```
+CREATE TABLE `catalog_category_product` (
+`category_id` int(10) unsigned NOT NULL COMMENT 'Category Id',
+`product_id` int(10) unsigned NOT NULL COMMENT 'Product Id',
+  PRIMARY KEY (`category_id`,`product_id`),
+  KEY `IDX_catalog_category_entity_CATEGORY_ID_PRODUCT_ID` (`category_id`, `product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Catalog Category Product';
+```
+
+```
+CREATE TABLE `catalog_category_entity` (
+`entity_id` int(10) unsigned NOT NULL COMMENT 'Entity Id',
+`entity_type_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Type Id',
+`attribute_set_id` int(10) unsigned DEFAULT NULL COMMENT 'Attribute Set Id',
+`parent_id` int(10) unsigned DEFAULT NULL COMMENT 'Parent Id',
+`position` int(5) unsigned DEFAULT NULL COMMENT 'Position',
+`level` int(5) unsigned DEFAULT NULL COMMENT 'Level',
+`path` varchar(32) DEFAULT NULL COMMENT 'Path',
+`created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
+`updated_at` timestamp NULL DEFAULT NULL COMMENT 'Updated At',
+  PRIMARY KEY (`entity_id`),
+  KEY `IDX_catalog_category_entity_ENTITY_ID` (`entity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Catalog Category Entity';
+```
+
+```
+CREATE TABLE `catalog_category_entity_varchar` (
+`value_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Value Id',
+`entity_type_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Type Id',
+`attribute_id` int(10) unsigned DEFAULT NULL COMMENT 'Attribute Id',
+`store_id` int(10) unsigned DEFAULT NULL COMMENT 'Store Id',
+`entity_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity Id',
+`value` varchar(100) DEFAULT NULL COMMENT 'Value',
+  PRIMARY KEY (`value_id`),
+  KEY `IDX_catalog_category_entity_varchar_VALUE_ID` (`value_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Catalog Category Entity Varchar';
+```
 
 
 Finally, import all csv file into the mysql tables by running the following commands:
@@ -245,6 +293,11 @@ LOAD DATA INFILE 'quote.csv' into table magento.quote FIELDS TERMINATED BY ',' E
 LOAD DATA INFILE 'quote_item.csv' into table magento.quote_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'enterprise_rma.csv' into table magento.enterprise_rma FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'enterprise_rma_item.csv' into table magento.enterprise_rma_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'catalog_product_entity.csv' into table magento.catalog_product_entity FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'catalog_category_product.csv' into table magento.catalog_category_product FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'catalog_category_entity.csv' into table magento.catalog_category_entity FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'catalog_category_entity_varchar.csv' into table magento.catalog_category_entity_varchar FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command
