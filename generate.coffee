@@ -25,8 +25,6 @@ STORES_FILE = 'data/core_store.csv'
 COMPANIES_FILE = 'data/company.csv'
 QUOTES_FILE = 'data/quote.csv'
 QUOTE_ITEMS_FILE = 'data/quote_item.csv'
-RETURN_FILE = 'data/enterprise_rma.csv'
-RETURN_ITEMS_FILE = 'data/enterprise_rma_item.csv'
 PRODUCT_FILE = 'data/catalog_product_entity.csv'
 CATEGORY_FILE = 'data/catalog_category_entity.csv'
 CATEGORY_VARCHAR_FILE = 'data/catalog_category_entity_varchar.csv'
@@ -48,8 +46,6 @@ CUSTOMER_GROUPS = [{id: 1, code: "NOT LOGGED IN"}
 
 DATE_BIAS = 1 # [0..100] where 0 = today
 DATE_WINDOW = 1095 # Days to extend data into the past
-RETURN_PERIOD_DAYS = 90 # Returns happen within 90 days of the order
-RETURN_PERCENT = 3 # This is the percent of ITEMS that get returned!
 
 go = (products) ->
 
@@ -79,9 +75,6 @@ go = (products) ->
   # Make customers buy the things and ship them to locations
   orders = generateOrders(TOTAL_ORDERS, customers, addresses, products, stores)
 
-  # Make customers return some of the things :(
-  returns = generateReturnsAndReturnItems(orders)
-
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
   exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
@@ -90,7 +83,6 @@ go = (products) ->
   exportData(QUOTE_ITEMS_FILE, quoteItems, "Exporting quote item list... ")
   exportData(STORES_FILE, stores, "Exporting store list... ")
   exportOrderData(orders, products, customers, addresses)
-  exportReturnData(returns)
   exportData(PRODUCT_FILE, productsAndCategories[0], "Exporting products...")
   exportData(PRODUCT_CATEGORY_FILE, productsAndCategories[1], "Exporting product category mappings...")
   exportData(CATEGORY_FILE, productsAndCategories[2], "Exporting categories...")
@@ -218,54 +210,20 @@ generateOrders = (total, customers, addresses, products, stores) ->
   console.log "Generating orders..."
   orders = []
   orderCounts = [] #a count of orders by customer_id
-  itemId = 0
   for index in [1..total]
     address = getRandomItem(addresses)
     couponCode = if chance.bool({likelihood: 10}) then getRandomItem(COUPONS) else null
     customer = getCustomerToBuyFavoringRepeats(customers, orderCounts, createdAt)
+    items = getItems(products, customer.store_id, ITEMS_MIN, ITEMS_MAX)
+    grandTotal = getCartValue(items)
     shippingAmount = getRandomItem([1.99,3.99,6.99])
     discountAmount = getDiscountAmount(couponCode, grandTotal)
     createdAt = getRandomDate()
     utmParameters = getUtmParameters()
 
-    items = getItems(products, customer.store_id, ITEMS_MIN, ITEMS_MAX)
-    grandTotal = getCartValue(items)
-    
-    orderReturned = false
-    orderItems = []
-
-    for item in items
-
-      qty_ordered = getRandomInt(1,5)
-      base_qty_refunded = 0
-      base_amount_refunded = 0
-      if chance.bool({likelihood: RETURN_PERCENT})
-        orderReturned = true # At least one item in the order was returned
-        base_qty_refunded = getRandomInt(1,qty_ordered+1)
-        base_amount_refunded = item.price
-
-      # Create order item
-      orderItem =
-        item_id: ++itemId
-        qty_ordered: qty_ordered
-        base_price: +item.price
-        name: item.name
-        order_id: index
-        parent_item_id: null
-        sku: item.sku
-        product_type: 'tools'
-        product_id: item.entity_id
-        store_id: item.store_id
-        created_at: createdAt
-        updated_at: createdAt
-        base_qty_refunded: base_qty_refunded
-        base_amount_refunded: base_amount_refunded
-      orderItems.push(orderItem)
-
-    # Create order
     order =
       entity_id: index
-      items: orderItems
+      items: items
       grand_total: grandTotal
       base_grand_total: grandTotal
       base_discount_amount: null
@@ -289,47 +247,9 @@ generateOrders = (total, customers, addresses, products, stores) ->
       customer_group_id: customer.group_id
       created_at: createdAt
       updated_at: createdAt
-      returned: orderReturned
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
-
-generateReturnsAndReturnItems = (orders) ->
-  console.log "Generating returns..."
-  returns = []
-  index = 1
-  returnItems = []
-  returnItemId = 0
-  prevReturnItemId = 0
-
-  for order in orders
-    if (order.returned)
-
-      dateRequested = getRandomReturnDate(order.created_at)
-      status = getReturnStatus()
-
-      returnItems = []
-      for item in order.items
-        if (item.base_qty_refunded > 0)
-          returnItem = 
-            entity_id: ++returnItemId
-            rma_entity_id: index
-            qty_returned: item.base_qty_refunded
-            order_item_id: item.item_id
-            product_name: item.name
-            status: status
-          returnItems.push(returnItem)
-
-      ret = 
-        entity_id: index++
-        date_requested: dateRequested
-        status: status
-        order_id: order.entity_id
-        customer_id: order.customer_id
-        items: returnItems
-      returns.push(ret)   
-
-  return returns
 
 getStoreById = (stores, id) ->
   for store in stores when store.store_id is id
@@ -426,11 +346,6 @@ getOrderStatus = () ->
   else if chance.bool({likelihood: 90}) then "processing" #90% of 17% of orders
   else getRandomItem(['pending','canceled','picked','shipped','picking']) 
 
-getReturnStatus = () ->
-  if chance.bool({likelihood: 83}) then "closed" #83% of orders
-  else if chance.bool({likelihood: 90}) then getRandomItem(["pending","authorized","received"]) #90% of 17% of orders
-  else getRandomItem(['partially_authorized','processed_closed'])
-
 exportData = (path, data, msg) ->
   console.log msg
   csvData = convertArrayToCsv(data)
@@ -448,27 +363,27 @@ getProductType = () ->
 
 exportOrderItems = (orders) ->
   csv = ''
+  itemId = 0
   orderItems = []
   for order in orders
     for item in order.items
-      orderItems.push(item)
-
+      createdAt = getRandomDate()
+      orderItem =
+        item_id: ++itemId
+        qty_ordered: getRandomInt(1,5)
+        base_price: +item.price
+        name: item.name
+        order_id: order.entity_id
+        parent_item_id: null
+        sku: item.sku
+        product_type: getProductType()
+        product_id: item.entity_id
+        store_id: item.store_id
+        created_at: createdAt
+        updated_at: createdAt
+      orderItems.push(orderItem)
   csv = convertArrayToCsv(orderItems)
   writeCsv(ORDER_ITEM_FILE, csv)
-
-exportReturnData = (returns) ->
-  console.log "Exporting returns..."
-  csvData = convertArrayToCsv(returns)
-  writeCsv(RETURN_FILE, csvData)
-
-  returnItems = []
-
-  for ret in returns
-    for item in ret.items
-      returnItems.push(item)
-
-  csv = convertArrayToCsv(returnItems)
-  writeCsv(RETURN_ITEMS_FILE, csv)
 
 getRandomDate = (start, end) ->
   min = 0
@@ -481,22 +396,6 @@ getRandomDate = (start, end) ->
   value = rand * (1 - mix) + (bias * mix)
   date = new Date()
   date.setDate(date.getDate() - value)
-  date.toISOString().slice(0, 19).replace('T', ' ');
-
-getRandomReturnDate = (startDate) ->
-  orderDate = new Date(startDate)
-  today = new Date()
-  returnMax = new Date(startDate)
-  returnMax.setDate(orderDate.getDate() + RETURN_PERIOD_DAYS)
-  if (returnMax > today)
-    returnMax = today
-  
-  min = orderDate.getTime()
-  max = returnMax.getTime()
-
-  date = new Date()
-  rand = Math.round(Math.random() * (max - min) + min)
-  date.setTime(rand)
   date.toISOString().slice(0, 19).replace('T', ' ');
 
 getProducts = (callback) ->
@@ -633,7 +532,6 @@ convertArrayToCsv = (arr, subTableFile) ->
   csv = "#{getCsvHeader(arr[0])}\n"
   for item in arr
     csv += "#{convertToCsv(item)}\n"
-    
   return csv.slice(0,-1)
 
 getCsvHeader = (object) ->
@@ -669,3 +567,4 @@ async.series([
       console.log "Something went wrong: #{err}"
     go(products)
 )
+
