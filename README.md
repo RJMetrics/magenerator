@@ -233,6 +233,7 @@ CREATE TABLE `enterprise_rma_item` (
 CREATE TABLE `catalog_product_entity` (
  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Entity ID',
 `sku` varchar(255) DEFAULT NULL COMMENT 'Sku',
+`name` varchar(255) DEFAULT NULL COMMENT 'Name',
 `created_at` timestamp NULL DEFAULT NULL COMMENT 'Created At',
 `updated_at` timestamp NULL DEFAULT NULL COMMENT 'Updated At',
   PRIMARY KEY (`entity_id`),

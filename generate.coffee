@@ -8,7 +8,7 @@ require "should"
 
 TOTAL_CUSTOMERS = 10000
 TOTAL_ADDRESSES = 10000
-TOTAL_PRODUCTS = 200
+TOTAL_PRODUCTS = 1000 #1994 is max number of products in file
 TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
@@ -106,6 +106,7 @@ generateProductsAndCategories = (products) ->
     productEntity = 
       entity_id: ++productIndex
       sku: product.sku
+      name: product.name
     productEntities.push(productEntity)
 
     # For all categories associated with the product, add them to the categoryNames table if they don't already exist
@@ -147,10 +148,7 @@ generateProductsAndCategories = (products) ->
 
     categoryEntity = 
       entity_id: categoryId
-      entity_type_id: null
-      attribute_set_id: null
       parent_id: parent_id
-      position: null
       level: level
       path: path
       created_at: null
@@ -159,9 +157,7 @@ generateProductsAndCategories = (products) ->
 
     catalogCategoryEntityVarchar = 
       value_id: null
-      entity_type_id: null
       attribute_id: 41
-      store_id: null
       entity_id: categoryId
       value: name
     catalogCategoryEntityVarchars.push(catalogCategoryEntityVarchar)
