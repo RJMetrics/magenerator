@@ -664,7 +664,29 @@ generateNegotiableQuotes = (total) ->
 
 generateNegotiableQuote = (index) ->
   item =
-    enity_id: index
+    quote_id: index
+    is_regular_quote: 0
+    status: ''
+    quote_name: chance.word()
+    negotiated_price_type: chance.integer({min:0,max:10})
+    negotiated_price_value: chance.floating({min: 0, max: 1000})
+    shipping_price: chance.floating({min: 0, max: 100})
+    expiration_period: null
+    status_email_notification: 0
+    snapshot: ''
+    has_unconfirmed_changes: 0
+    is_customer_price_changed: 0
+    is_shipping_tax_changed: 0
+    notifications: 0
+    applied_rule_ids: null
+    is_address_draft: 0
+    deleted_sku: ''
+    creator_type: 3
+    creator_id: chance.integer({min:1,max:1000})
+    original_total_price: chance.floating({min:0,max:1000})
+    base_original_total_price: chance.floating({min:0,max:1000})
+    negotiated_total_price: chance.floating({min:0,max:1000})
+    base_negotiated_total_price: chance.floating({min:0,max:1000})
 
 generateNegotiableQuoteHistories = (total) ->
   items = []
