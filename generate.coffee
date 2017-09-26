@@ -8,7 +8,7 @@ require "should"
 
 TOTAL_CUSTOMERS = 10000
 TOTAL_ADDRESSES = 10000
-TOTAL_PRODUCTS = 200
+TOTAL_PRODUCTS = 1000 #1994 is max number of products in file
 TOTAL_ORDERS = 30000 #keep ratio of orders to customers at least 3:1 to allow interesting repeat ratios to form
 ITEMS_MIN = 1
 ITEMS_MAX = 20
@@ -17,16 +17,20 @@ TOTAL_COMPANIES = 20
 TOTAL_QUOTES = 100
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
+PRODUCT_INPUT_FILE = 'data/products.csv'
 ORDER_FILE = 'data/sales_order.csv'
 ORDER_ITEM_FILE = 'data/sales_order_item.csv'
 ADDRESS_FILE = 'data/sales_order_address.csv'
-PRODUCT_FILE = 'data/products.csv'
 STORES_FILE = 'data/core_store.csv'
 COMPANIES_FILE = 'data/company.csv'
 QUOTES_FILE = 'data/quote.csv'
 QUOTE_ITEMS_FILE = 'data/quote_item.csv'
 RETURN_FILE = 'data/enterprise_rma.csv'
 RETURN_ITEMS_FILE = 'data/enterprise_rma_item.csv'
+PRODUCT_FILE = 'data/catalog_product_entity.csv'
+CATEGORY_FILE = 'data/catalog_category_entity.csv'
+CATEGORY_VARCHAR_FILE = 'data/catalog_category_entity_varchar.csv'
+PRODUCT_CATEGORY_FILE = 'data/catalog_category_product.csv'
 
 CURRENCY = "$"
 STORE_NAME = "MageMart"
@@ -48,6 +52,10 @@ RETURN_PERIOD_DAYS = 90 # Returns happen within 90 days of the order
 RETURN_PERCENT = 3 # This is the percent of ITEMS that get returned!
 
 go = (products) ->
+
+  # Generate product and category tables
+  productsAndCategories = generateProductsAndCategories(products) #[productEntities, productCategoryEntities, categoryEntities, catalogCategoryEntityVarchars]
+
   # Generate customer groups
   customerGroups = generateCustomerGroups()
 
@@ -83,7 +91,86 @@ go = (products) ->
   exportData(STORES_FILE, stores, "Exporting store list... ")
   exportOrderData(orders, products, customers, addresses)
   exportReturnData(returns)
+  exportData(PRODUCT_FILE, productsAndCategories[0], "Exporting products...")
+  exportData(PRODUCT_CATEGORY_FILE, productsAndCategories[1], "Exporting product category mappings...")
+  exportData(CATEGORY_FILE, productsAndCategories[2], "Exporting categories...")
+  exportData(CATEGORY_VARCHAR_FILE, productsAndCategories[3], "Exporting category names...")
   console.log "Complete!"
+
+generateProductsAndCategories = (products) ->
+  console.log "Generating products and categories..."
+
+  productEntities = [] # Product objects
+  productIndex = 0
+  categoryNames = [] # Array of all category names, built when creating products and product-category mapping
+  categoryEntities = [] # Category objects
+  catalogCategoryEntityVarchars = []
+  productCategoryEntities = [] # Product-category mapping
+
+  # First, loop through all products
+  for product in products
+
+    # Create product
+    productEntity = 
+      entity_id: ++productIndex
+      sku: product.sku
+      name: product.name
+    productEntities.push(productEntity)
+
+    # For all categories associated with the product, add them to the categoryNames table if they don't already exist
+    productsCategories = product.categories.split(',')
+    for category in productsCategories
+      if categoryNames.indexOf(category) < 0
+        categoryNames.push(category)
+
+        # Find other categories (may not be associated with products, but need for path), and add to the categoryNames table if they don't already exist
+        subCategories = category.split("/")
+        for i in [0..subCategories.length - 1]
+          subCategory = subCategories.slice(0,i+1).join('/')
+          if categoryNames.indexOf(subCategory) < 0
+            categoryNames.push(subCategory)
+
+      # Map product to categories
+      categoryIndex = categoryNames.indexOf(category)
+      productCategoryEntity = 
+        category_id: categoryIndex
+        prdouct_id: productIndex
+      productCategoryEntities.push(productCategoryEntity)
+
+  # Create category objects out each element of the categoryNames array
+  for categoryId in [0..categoryNames.length-1]
+
+    fullCategoryName = categoryNames[categoryId]
+    path = []
+    subCategories = fullCategoryName.split('/')
+
+    for i in [0..subCategories.length-1]
+      subCategory = subCategories.slice(0,i+1).join('/')
+      subCategoryIndex = categoryNames.indexOf(subCategory)
+      path.push(subCategoryIndex)
+
+    parent_id = if path.length > 1 then path[path.length - 2] else 0
+    path = path.join('/')
+    level = subCategories.length - 1
+    name = subCategories[subCategories.length-1]
+
+    categoryEntity = 
+      entity_id: categoryId
+      parent_id: parent_id
+      level: level
+      path: path
+      created_at: null
+      updated_at: null
+    categoryEntities.push(categoryEntity)
+
+    catalogCategoryEntityVarchar = 
+      value_id: null
+      attribute_id: 41
+      entity_id: categoryId
+      value: name
+    catalogCategoryEntityVarchars.push(catalogCategoryEntityVarchar)
+
+  return [productEntities, productCategoryEntities, categoryEntities, catalogCategoryEntityVarchars]
 
 generateCustomerGroups = () ->
   console.log "Generating customers groups..."
@@ -409,7 +496,7 @@ getRandomReturnDate = (startDate) ->
   date.toISOString().slice(0, 19).replace('T', ' ');
 
 getProducts = (callback) ->
-  fs.readFile PRODUCT_FILE, 'utf-8', (err, data) ->
+  fs.readFile PRODUCT_INPUT_FILE, 'utf-8', (err, data) ->
     console.log "Loaded product data..."
     csvParse data, {delimiter: ','}, (err, result) ->
       products = convertArrayToObjectList(result)
