@@ -715,6 +715,12 @@ generateNegotiableQuoteComments = (total) ->
 generateNegotiableQuoteComment = (index) ->
   item =
     enity_id: index
+    parent_id: chance.integer({min:1,max:1000})
+    creator_type: 0
+    is_decline: 0
+    is_draft: 0
+    creator_id: chance.integer({min:1,max:1000})
+    created_at: null
 
 generateCompanyPayments = (total) ->
   items = []
@@ -724,7 +730,10 @@ generateCompanyPayments = (total) ->
 
 generateCompanyPayment = (index) ->
   item =
-    enity_id: index
+    company_id: chance.integer({min:1,max:100})
+    applicable_payment_method: 0
+    available_payment_methods: chance.word()
+    use_config_settings: 0
 
 generateCompanyAdvancedCustomerEntities = (total) ->
   items = []
@@ -734,7 +743,11 @@ generateCompanyAdvancedCustomerEntities = (total) ->
 
 generateCompanyAdvancedCustomerEntity = (index) ->
   item =
-    enity_id: index
+    customer_id: chance.integer({min:1,max:1000})
+    company_id:  chance.integer({min:1,max:1000})
+    job_title: chance.word()
+    status: ''
+    telephone: chance.phone()
 
 generateCompanyCredits = (total) ->
   items = []
@@ -745,6 +758,11 @@ generateCompanyCredits = (total) ->
 generateCompanyCredit = (index) ->
   item =
     enity_id: index
+    company_id: chance.integer({min:1,max:1000})
+    credit_limit: chance.floating({min:0,max:10000})
+    balance: chance.floating({min:0,max:10000})
+    currency_code: chance.currency().code
+    exceed_limit: chance.integer({min:0,max:100000})
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
