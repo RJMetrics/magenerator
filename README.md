@@ -390,7 +390,6 @@ LOAD DATA INFILE 'catalog_product_entity.csv' into table magento.catalog_product
 LOAD DATA INFILE 'catalog_category_product.csv' into table magento.catalog_category_product FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'catalog_category_entity.csv' into table magento.catalog_category_entity FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'catalog_category_entity_varchar.csv' into table magento.catalog_category_entity_varchar FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command
