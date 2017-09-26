@@ -32,6 +32,14 @@ CATEGORY_FILE = 'data/catalog_category_entity.csv'
 CATEGORY_VARCHAR_FILE = 'data/catalog_category_entity_varchar.csv'
 PRODUCT_CATEGORY_FILE = 'data/catalog_category_product.csv'
 
+SHARED_CATALOG_FILE = 'data/shared_catalog.csv'
+NEGOTIABLE_QUOTE_FILE = 'data/negotiable_quote.csv'
+NEGOTIABLE_QUOTE_HISTORY_FILE = 'data/negotiable_quote_history.csv'
+NEGOTIABLE_QUOTE_COMMENT_FILE = 'data/negotiable_quote_comment.csv'
+COMPANY_PAYMENT_FILE = 'data/company_payment.csv'
+COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE = 'data/compay_advanced_customer_entity.csv'
+COMPANY_CREDIT_FILE = 'data/company_credit.csv'
+
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -629,7 +637,6 @@ convertArrayToCsv = (arr, subTableFile) ->
   csv = "#{getCsvHeader(arr[0])}\n"
   for item in arr
     csv += "#{convertToCsv(item)}\n"
-    
   return csv.slice(0,-1)
 
 getCsvHeader = (object) ->
