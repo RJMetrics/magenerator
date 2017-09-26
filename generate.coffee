@@ -94,16 +94,22 @@ go = (products) ->
   sharedCatalog = generateSharedCatalogs(1000)
 
   # Generate negotiable quotes
+  negotiableQuotes = generateNegotiableQuotes(1000)
 
   # Generate negotiable quote history
+  negotiableQuoteHistory = generateNegotiableQuoteHistory(1000)
 
   # Generate negotiable quote comment
+  negotiableQuoteComments = generateNegotiableQuoteComments(1000)
 
   # Generate company payment
+  companyPayments = generateCompanyPayments(1000)
 
   # Generate company advanced_customer_entity
+  companyAdvancedCustomerEntity = generateCompanyAdvancedCustomerEntity(1000)
 
   # Generate company credit
+  companyCredit = generateCompanyCredit(1000)
 
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
@@ -120,6 +126,14 @@ go = (products) ->
   exportData(CATEGORY_VARCHAR_FILE, productsAndCategories[3], "Exporting category names...")
 
   exportData(SHARED_CATALOG_FILE, sharedCatalog, "Exporting shared catalog...")
+  exportData(NEGOTIABLE_QUOTE_FILE, negotiableQuotes, "Exporting negotiable quotes...")
+  exportData(NEGOTIABLE_QUOTE_HISTORY_FILE, negotiableQuoteHistory, "Exporting negotiable quote history...")
+  exportData(NEGOTIABLE_QUOTE_COMMENT_FILE, negotiableQuoteComments, "Exporting negotiable quote comment...")
+  exportData(COMPANY_PAYMENT_FILE, companyPayments, "Exporting company payments...")
+  exportData(
+    COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE, companyAdvancedCustomerEntity, "Exporting company advanced customer entity...")
+  exportData(COMPANY_CREDIT_FILE, companyCredit, "Exporting company credit...")
+
   console.log "Complete!"
 
 generateProductsAndCategories = (products) ->
