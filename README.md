@@ -202,6 +202,33 @@ CREATE TABLE `quote_item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Quote Item';
 ```
 
+```
+CREATE TABLE `enterprise_rma` (
+  `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
+  `date_requested` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Date Requested',
+  `status` varchar(32) DEFAULT NULL COMMENT 'Status',
+  `order_id` smallint(5) unsigned DEFAULT NULL COMMENT 'Order Id',
+  `customer_id` smallint(5) unsigned DEFAULT NULL COMMENT 'Customer Id',
+  PRIMARY KEY (`entity_id`),
+  KEY `IDX_ENTERPRISE_RMA_ORDER_ID` (`order_id`),
+  KEY `IDX_ENTERPRISE_RMA_CUSTOMER_ID` (`customer_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Enterprise Rma';
+```
+
+```
+CREATE TABLE `enterprise_rma_item` (
+  `entity_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Entity Id',
+  `rma_entity_id` smallint(5) unsigned DEFAULT NULL COMMENT 'Rma Entity Id',
+  `qty_returned` decimal(12,4) DEFAULT '0.0000' COMMENT 'Qty Returned',
+  `order_item_id` int unsigned DEFAULT NULL COMMENT 'Order Item Id',
+  `product_name` varchar(100) DEFAULT NULL COMMENT 'Product Id',
+  `status` varchar(32) DEFAULT NULL COMMENT 'Status',
+  PRIMARY KEY (`entity_id`),
+  KEY `IDX_ENTERPRISE_RMA_ITEM_ORDER_ITEM_ID` (`order_item_id`),
+  KEY `IDX_ENTERPRISE_RMA_ITEM_RMA_ENTITY_ID` (`rma_entity_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Enterprise Rma Item';
+```
+
 
 
 Finally, import all csv file into the mysql tables by running the following commands:
@@ -216,6 +243,8 @@ LOAD DATA INFILE 'sales_flat_order_address.csv' into table magento.sales_flat_or
 LOAD DATA INFILE 'company.csv' into table magento.company FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'quote.csv' into table magento.quote FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'quote_item.csv' into table magento.quote_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'enterprise_rma.csv' into table magento.enterprise_rma FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+LOAD DATA INFILE 'enterprise_rma_item.csv' into table magento.enterprise_rma_item FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command
