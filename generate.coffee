@@ -696,7 +696,15 @@ generateNegotiableQuoteHistories = (total) ->
 
 generateNegotiableQuoteHistory = (index) ->
   item =
-    enity_id: index
+    history_id: index
+    quote_id: chance.integer({min:1,max:1000})
+    is_seller: 0
+    author_id: chance.integer({min:1,max:1000})
+    is_draft: 0
+    status: ''
+    log_data: ''
+    snapshot_data: ''
+    created_at: null
 
 generateNegotiableQuoteComments = (total) ->
   items = []
