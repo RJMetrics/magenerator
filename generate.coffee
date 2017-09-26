@@ -642,6 +642,66 @@ generateSharedCatalog = (index) ->
     created_by: chance.integer({min:0,max:10000})
     store_id: chance.integer({min:0,max:10})
 
+generateNegotiableQuotes = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuote(index))
+  return items
+
+generateNegotiableQuote = (index) ->
+  item =
+    enity_id: index
+
+generateNegotiableQuoteHistories = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuoteHistorie(index))
+  return items
+
+generateNegotiableQuoteHistory = (index) ->
+  item =
+    enity_id: index
+
+generateNegotiableQuoteComments = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuoteComment(index))
+  return items
+
+generateNegotiableQuoteComment = (index) ->
+  item =
+    enity_id: index
+
+generateCompanyPayments = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyPayment(index))
+  return items
+
+generateCompanyPayment = (index) ->
+  item =
+    enity_id: index
+
+generateCompanyAdvancedCustomerEntities = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyAdvancedCustomerEntity(index))
+  return items
+
+generateCompanyAdvancedCustomerEntity = (index) ->
+  item =
+    enity_id: index
+
+generateCompanyCredits = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyCredit(index))
+  return items
+
+generateCompanyCredit = (index) ->
+  item =
+    enity_id: index
+
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
