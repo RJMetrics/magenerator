@@ -90,6 +90,21 @@ go = (products) ->
   # Make customers return some of the things :(
   returns = generateReturnsAndReturnItems(orders)
 
+  # Generate shared catalog
+  sharedCatalog = generateSharedCatalogs(1000)
+
+  # Generate negotiable quotes
+
+  # Generate negotiable quote history
+
+  # Generate negotiable quote comment
+
+  # Generate company payment
+
+  # Generate company advanced_customer_entity
+
+  # Generate company credit
+
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
   exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
@@ -103,6 +118,8 @@ go = (products) ->
   exportData(PRODUCT_CATEGORY_FILE, productsAndCategories[1], "Exporting product category mappings...")
   exportData(CATEGORY_FILE, productsAndCategories[2], "Exporting categories...")
   exportData(CATEGORY_VARCHAR_FILE, productsAndCategories[3], "Exporting category names...")
+
+  exportData(SHARED_CATALOG_FILE, sharedCatalog, "Exporting shared catalog...")
   console.log "Complete!"
 
 generateProductsAndCategories = (products) ->
@@ -607,6 +624,23 @@ generateQuoteItem = (id, quote_id, product, store) ->
     price: price
     base_price: price
     product_type: product.product_type
+
+generateSharedCatalogs = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateSharedCatalog(index))
+  return items
+
+generateSharedCatalog = (index) ->
+  item =
+    entity_id: index
+    name: chance.word()
+    description: chance.word()
+    customer_group_id: chance.integer({min:1,max:10})
+    type: chance.integer({min:0,max:0})
+    created_at: null
+    created_by: chance.integer({min:0,max:10000})
+    store_id: chance.integer({min:0,max:10})
 
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
