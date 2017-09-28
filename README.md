@@ -122,6 +122,19 @@ PRIMARY KEY (`entity_id`)
 ```
 
 ```
+CREATE TABLE `shared_catalog` (
+  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Shared Catalog Entity Id',
+  `name` varchar(255) DEFAULT NULL COMMENT 'Shared Catalog Name', 
+  `description` text COMMENT 'Shared Catalog description',
+  `customer_group_id` int(10) UNSIGNED NOT NULL COMMENT 'Customer Group Id',
+  `type` smallint(5) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Type: 0-custom, 1-public',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At',
+  `created_by` int(10) UNSIGNED DEFAULT NULL COMMENT 'Customer Id',
+  `store_id` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Store ID'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Shared Catalog Table';
+```
+
+```
 CREATE TABLE `customer_group` (
 `customer_group_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Group Id',
 `customer_group_code` varchar(32) DEFAULT NULL COMMENT 'Customer Group Code',
@@ -274,6 +287,90 @@ CREATE TABLE `catalog_category_entity_varchar` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Catalog Category Entity Varchar';
 ```
 
+```
+CREATE TABLE `negotiable_quote` (
+  `quote_id` int(10) UNSIGNED NOT NULL COMMENT 'Quote ID',
+  `is_regular_quote` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Is regular quote',
+  `status` varchar(255) NOT NULL COMMENT 'Negotiable quote status',
+  `quote_name` varchar(255) DEFAULT NULL COMMENT 'Negotiable quote name',
+  `negotiated_price_type` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Negotiated price type',
+  `negotiated_price_value` float DEFAULT NULL COMMENT 'Negotiable price value',
+  `shipping_price` float DEFAULT NULL COMMENT 'Shipping price',
+  `expiration_period` date DEFAULT NULL COMMENT 'Expiration period',
+  `status_email_notification` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Status email notification',
+  `snapshot` mediumtext COMMENT 'Snapshot',
+  `has_unconfirmed_changes` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Has changes, not confirmed by merchant',
+  `is_customer_price_changed` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Is Customer Price Changed',
+  `is_shipping_tax_changed` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Is Shipping Tax Changed',
+  `notifications` int(11) DEFAULT NULL COMMENT 'Notifications',
+  `applied_rule_ids` varchar(255) DEFAULT NULL COMMENT 'Applied Rule Ids',
+  `is_address_draft` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Is address update from checkout',
+  `deleted_sku` text COMMENT 'Deleted products SKU',
+  `creator_type` smallint(6) NOT NULL DEFAULT '3' COMMENT 'Quote creator type',
+  `creator_id` int(11) DEFAULT NULL COMMENT 'Quote creator id',
+  `original_total_price` decimal(12,4) DEFAULT NULL COMMENT 'Original Total Price',
+  `base_original_total_price` decimal(12,4) DEFAULT NULL COMMENT 'Base Original Total Price',
+  `negotiated_total_price` decimal(12,4) DEFAULT NULL COMMENT 'Negotiated Total Price',
+  `base_negotiated_total_price` decimal(12,4) DEFAULT NULL COMMENT 'Base Negotiated Total Price'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='negotiable_quote';
+```
+
+```
+CREATE TABLE `negotiable_quote_history` (
+  `history_id` int(10) UNSIGNED NOT NULL COMMENT 'History Id',
+  `quote_id` int(10) UNSIGNED NOT NULL COMMENT 'Quote Id',
+  `is_seller` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is changes has made by seller',
+  `author_id` int(10) UNSIGNED NOT NULL COMMENT 'Log author ID',
+  `is_draft` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is draft message',
+  `status` varchar(255) NOT NULL DEFAULT 'created' COMMENT 'Log status',
+  `log_data` text COMMENT 'Serialized log data',
+  `snapshot_data` text COMMENT 'Serialized quote snapshot data',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Negotiable quote history log';
+```
+
+```
+CREATE TABLE `negotiable_quote_comment` (
+  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Entity Id',
+  `parent_id` int(10) UNSIGNED NOT NULL COMMENT 'Parent Id',
+  `creator_type` smallint(5) UNSIGNED NOT NULL COMMENT 'Comment creator type',
+  `is_decline` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is quote was declined by seller',
+  `is_draft` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is draft message',
+  `creator_id` int(10) UNSIGNED NOT NULL COMMENT 'Comment author ID',
+  `comment` text COMMENT 'Comment',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created At'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Negotiable quote comments';
+```
+
+```
+CREATE TABLE `company_payment` (
+  `company_id` int(10) UNSIGNED NOT NULL COMMENT 'Company ID',
+  `applicable_payment_method` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Applicable payment method',
+  `available_payment_methods` text COMMENT 'Payment methods list',
+  `use_config_settings` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Use config settings'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='company_payment';
+```
+
+```
+CREATE TABLE `company_advanced_customer_entity` (
+  `customer_id` int(10) UNSIGNED NOT NULL COMMENT 'Customer ID',
+  `company_id` int(10) UNSIGNED NOT NULL COMMENT 'Company ID',
+  `job_title` text COMMENT 'Job Title',
+  `status` smallint(5) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Status',
+  `telephone` varchar(255) DEFAULT NULL COMMENT 'Phone Number'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='company_advanced_customer_entity';
+```
+
+```
+CREATE TABLE `company_credit` (
+  `entity_id` int(10) UNSIGNED NOT NULL COMMENT 'Credit ID',
+  `company_id` int(10) UNSIGNED NOT NULL COMMENT 'Company ID',
+  `credit_limit` decimal(12,4) UNSIGNED DEFAULT NULL COMMENT 'Credit Limit',
+  `balance` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT 'Outstanding balance',
+  `currency_code` varchar(3) NOT NULL DEFAULT '' COMMENT 'Currency Code',
+  `exceed_limit` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Exceed Limit'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Company Credit Table';
+```
 
 Finally, import all csv file into the mysql tables by running the following commands:
 
@@ -293,7 +390,6 @@ LOAD DATA INFILE 'catalog_product_entity.csv' into table magento.catalog_product
 LOAD DATA INFILE 'catalog_category_product.csv' into table magento.catalog_category_product FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'catalog_category_entity.csv' into table magento.catalog_category_entity FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 LOAD DATA INFILE 'catalog_category_entity_varchar.csv' into table magento.catalog_category_entity_varchar FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
 ```
 
 If you need to load the data into a remote db from a local csv file, use this command

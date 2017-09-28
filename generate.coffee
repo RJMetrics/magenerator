@@ -32,6 +32,14 @@ CATEGORY_FILE = 'data/catalog_category_entity.csv'
 CATEGORY_VARCHAR_FILE = 'data/catalog_category_entity_varchar.csv'
 PRODUCT_CATEGORY_FILE = 'data/catalog_category_product.csv'
 
+SHARED_CATALOG_FILE = 'data/shared_catalog.csv'
+NEGOTIABLE_QUOTE_FILE = 'data/negotiable_quote.csv'
+NEGOTIABLE_QUOTE_HISTORY_FILE = 'data/negotiable_quote_history.csv'
+NEGOTIABLE_QUOTE_COMMENT_FILE = 'data/negotiable_quote_comment.csv'
+COMPANY_PAYMENT_FILE = 'data/company_payment.csv'
+COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE = 'data/compay_advanced_customer_entity.csv'
+COMPANY_CREDIT_FILE = 'data/company_credit.csv'
+
 CURRENCY = "$"
 STORE_NAME = "MageMart"
 COUPONS = chance.unique(chance.hash, 20, {casing: 'upper', length: 5})
@@ -82,6 +90,27 @@ go = (products) ->
   # Make customers return some of the things :(
   returns = generateReturnsAndReturnItems(orders)
 
+  # Generate shared catalog
+  sharedCatalog = generateSharedCatalogs(1000)
+
+  # Generate negotiable quotes
+  negotiableQuotes = generateNegotiableQuotes(1000)
+
+  # Generate negotiable quote history
+  negotiableQuoteHistory = generateNegotiableQuoteHistory(1000)
+
+  # Generate negotiable quote comment
+  negotiableQuoteComments = generateNegotiableQuoteComments(1000)
+
+  # Generate company payment
+  companyPayments = generateCompanyPayments(1000)
+
+  # Generate company advanced_customer_entity
+  companyAdvancedCustomerEntity = generateCompanyAdvancedCustomerEntity(1000)
+
+  # Generate company credit
+  companyCredit = generateCompanyCredit(1000)
+
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
   exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
@@ -95,6 +124,16 @@ go = (products) ->
   exportData(PRODUCT_CATEGORY_FILE, productsAndCategories[1], "Exporting product category mappings...")
   exportData(CATEGORY_FILE, productsAndCategories[2], "Exporting categories...")
   exportData(CATEGORY_VARCHAR_FILE, productsAndCategories[3], "Exporting category names...")
+
+  exportData(SHARED_CATALOG_FILE, sharedCatalog, "Exporting shared catalog...")
+  exportData(NEGOTIABLE_QUOTE_FILE, negotiableQuotes, "Exporting negotiable quotes...")
+  exportData(NEGOTIABLE_QUOTE_HISTORY_FILE, negotiableQuoteHistory, "Exporting negotiable quote history...")
+  exportData(NEGOTIABLE_QUOTE_COMMENT_FILE, negotiableQuoteComments, "Exporting negotiable quote comment...")
+  exportData(COMPANY_PAYMENT_FILE, companyPayments, "Exporting company payments...")
+  exportData(
+    COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE, companyAdvancedCustomerEntity, "Exporting company advanced customer entity...")
+  exportData(COMPANY_CREDIT_FILE, companyCredit, "Exporting company credit...")
+
   console.log "Complete!"
 
 generateProductsAndCategories = (products) ->
@@ -600,6 +639,131 @@ generateQuoteItem = (id, quote_id, product, store) ->
     base_price: price
     product_type: product.product_type
 
+generateSharedCatalogs = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateSharedCatalog(index))
+  return items
+
+generateSharedCatalog = (index) ->
+  item =
+    entity_id: index
+    name: chance.word()
+    description: chance.word()
+    customer_group_id: chance.integer({min:1,max:10})
+    type: chance.integer({min:0,max:0})
+    created_at: null
+    created_by: chance.integer({min:0,max:10000})
+    store_id: chance.integer({min:0,max:10})
+
+generateNegotiableQuotes = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuote(index))
+  return items
+
+generateNegotiableQuote = (index) ->
+  item =
+    quote_id: index
+    is_regular_quote: 0
+    status: ''
+    quote_name: chance.word()
+    negotiated_price_type: chance.integer({min:0,max:10})
+    negotiated_price_value: chance.floating({min: 0, max: 1000})
+    shipping_price: chance.floating({min: 0, max: 100})
+    expiration_period: null
+    status_email_notification: 0
+    snapshot: ''
+    has_unconfirmed_changes: 0
+    is_customer_price_changed: 0
+    is_shipping_tax_changed: 0
+    notifications: 0
+    applied_rule_ids: null
+    is_address_draft: 0
+    deleted_sku: ''
+    creator_type: 3
+    creator_id: chance.integer({min:1,max:1000})
+    original_total_price: chance.floating({min:0,max:1000})
+    base_original_total_price: chance.floating({min:0,max:1000})
+    negotiated_total_price: chance.floating({min:0,max:1000})
+    base_negotiated_total_price: chance.floating({min:0,max:1000})
+
+generateNegotiableQuoteHistories = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuoteHistorie(index))
+  return items
+
+generateNegotiableQuoteHistory = (index) ->
+  item =
+    history_id: index
+    quote_id: chance.integer({min:1,max:1000})
+    is_seller: 0
+    author_id: chance.integer({min:1,max:1000})
+    is_draft: 0
+    status: ''
+    log_data: ''
+    snapshot_data: ''
+    created_at: null
+
+generateNegotiableQuoteComments = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateNegotiableQuoteComment(index))
+  return items
+
+generateNegotiableQuoteComment = (index) ->
+  item =
+    enity_id: index
+    parent_id: chance.integer({min:1,max:1000})
+    creator_type: 0
+    is_decline: 0
+    is_draft: 0
+    creator_id: chance.integer({min:1,max:1000})
+    created_at: null
+
+generateCompanyPayments = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyPayment(index))
+  return items
+
+generateCompanyPayment = (index) ->
+  item =
+    company_id: chance.integer({min:1,max:100})
+    applicable_payment_method: 0
+    available_payment_methods: chance.word()
+    use_config_settings: 0
+
+generateCompanyAdvancedCustomerEntities = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyAdvancedCustomerEntity(index))
+  return items
+
+generateCompanyAdvancedCustomerEntity = (index) ->
+  item =
+    customer_id: chance.integer({min:1,max:1000})
+    company_id:  chance.integer({min:1,max:1000})
+    job_title: chance.word()
+    status: ''
+    telephone: chance.phone()
+
+generateCompanyCredits = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateCompanyCredit(index))
+  return items
+
+generateCompanyCredit = (index) ->
+  item =
+    enity_id: index
+    company_id: chance.integer({min:1,max:1000})
+    credit_limit: chance.floating({min:0,max:10000})
+    balance: chance.floating({min:0,max:10000})
+    currency_code: chance.currency().code
+    exceed_limit: chance.integer({min:0,max:100000})
+
 escapeQuotesForCsv = (str) ->
   if typeof str is 'string'
     str.replace('"','""')
@@ -629,7 +793,6 @@ convertArrayToCsv = (arr, subTableFile) ->
   csv = "#{getCsvHeader(arr[0])}\n"
   for item in arr
     csv += "#{convertToCsv(item)}\n"
-    
   return csv.slice(0,-1)
 
 getCsvHeader = (object) ->
