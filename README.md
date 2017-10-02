@@ -372,6 +372,15 @@ CREATE TABLE `company_credit` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Company Credit Table';
 ```
 
+```
+CREATE TABLE `admin_user` (
+  `user_id` int(10) UNSIGNED NOT NULL COMMENT 'User ID',
+  `email` varchar(128) DEFAULT NULL COMMENT 'User Email',
+  `username` varchar(40) DEFAULT NULL COMMENT 'User Login',
+  `is_active` smallint(6) NOT NULL DEFAULT '1' COMMENT 'User Is Active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Admin User Table';
+```
+
 Finally, import all csv file into the mysql tables by running the following commands:
 
 ```
