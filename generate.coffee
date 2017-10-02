@@ -31,6 +31,7 @@ PRODUCT_FILE = 'data/catalog_product_entity.csv'
 CATEGORY_FILE = 'data/catalog_category_entity.csv'
 CATEGORY_VARCHAR_FILE = 'data/catalog_category_entity_varchar.csv'
 PRODUCT_CATEGORY_FILE = 'data/catalog_category_product.csv'
+ADMIN_USER_FILE = 'data/admin_user.csv'
 
 SHARED_CATALOG_FILE = 'data/shared_catalog.csv'
 NEGOTIABLE_QUOTE_FILE = 'data/negotiable_quote.csv'
@@ -111,6 +112,9 @@ go = (products) ->
   # Generate company credit
   companyCredit = generateCompanyCredit(1000)
 
+  # Generate company credit
+  adminUsers = generateAdminUsers(10)
+
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
   exportData(CUSTOMER_GROUPS_FILE, customerGroups, "Exporting customer group list... ")
@@ -133,6 +137,7 @@ go = (products) ->
   exportData(
     COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE, companyAdvancedCustomerEntity, "Exporting company advanced customer entity...")
   exportData(COMPANY_CREDIT_FILE, companyCredit, "Exporting company credit...")
+  exportData(ADMIN_USER_FILE, adminUsers, "Exporting admin users...")
 
   console.log "Complete!"
 
@@ -580,6 +585,18 @@ generateCompany = (id) ->
     super_user_id: null
     reject_reason: null
     rejected_at: null
+
+generateAdminUsers = (total) ->
+  items = []
+  for index in [0..total]
+    items.push(generateAdminUser(index))
+  return items
+
+generateAdminUser = (index) ->
+  item =
+    user_id: index
+    email: chance.email()
+    is_active: 1
 
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
