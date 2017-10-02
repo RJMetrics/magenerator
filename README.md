@@ -144,7 +144,7 @@ PRIMARY KEY (`customer_group_id`)
 ```
 
 ```
-CREATE TABLE `core_store` (
+CREATE TABLE `store` (
 `store_id` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Store Id',
 `name` varchar(255) DEFAULT NULL COMMENT 'Store Name',
 PRIMARY KEY (`store_id`)
