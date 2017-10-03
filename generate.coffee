@@ -14,7 +14,7 @@ ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
 TOTAL_COMPANIES = 20
-TOTAL_QUOTES = 100
+TOTAL_QUOTES = 1000
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 PRODUCT_INPUT_FILE = 'data/products.csv'
@@ -38,7 +38,7 @@ NEGOTIABLE_QUOTE_FILE = 'data/negotiable_quote.csv'
 NEGOTIABLE_QUOTE_HISTORY_FILE = 'data/negotiable_quote_history.csv'
 NEGOTIABLE_QUOTE_COMMENT_FILE = 'data/negotiable_quote_comment.csv'
 COMPANY_PAYMENT_FILE = 'data/company_payment.csv'
-COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE = 'data/compay_advanced_customer_entity.csv'
+COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE = 'data/company_advanced_customer_entity.csv'
 COMPANY_CREDIT_FILE = 'data/company_credit.csv'
 
 CURRENCY = "$"
@@ -92,7 +92,7 @@ go = (products) ->
   returns = generateReturnsAndReturnItems(orders)
 
   # Generate shared catalog
-  sharedCatalog = generateSharedCatalogs(1000)
+  sharedCatalog = generateSharedCatalogs(5)
 
   # Generate negotiable quotes
   negotiableQuotes = generateNegotiableQuotes(1000)
@@ -566,7 +566,7 @@ generateCompany = (id) ->
   name = "#{capitalize(chance.word())}#{generateCompanySuffix()}"
   company =
     entity_id: id
-    status: 0
+    status: 1
     company_name: name
     legal_name: name
     company_email: null
@@ -580,7 +580,7 @@ generateCompany = (id) ->
     region_id: null
     postcode: null
     telephone: null
-    customer_group_id: null
+    customer_group_id: chance.integer({min:2,max:6})
     sales_representative_id: null
     super_user_id: null
     reject_reason: null
@@ -688,7 +688,7 @@ generateNegotiableQuote = (index) ->
     negotiated_price_type: chance.integer({min:0,max:10})
     negotiated_price_value: chance.floating({min: 0, max: 1000})
     shipping_price: chance.floating({min: 0, max: 100})
-    expiration_period: null
+    expiration_period: getRandomDate()
     status_email_notification: 0
     snapshot: ''
     has_unconfirmed_changes: 0
@@ -704,6 +704,7 @@ generateNegotiableQuote = (index) ->
     base_original_total_price: chance.floating({min:0,max:1000})
     negotiated_total_price: chance.floating({min:0,max:1000})
     base_negotiated_total_price: chance.floating({min:0,max:1000})
+    reserved_order_id: chance.integer({min:1,max:1000})
 
 generateNegotiableQuoteHistories = (total) ->
   items = []
