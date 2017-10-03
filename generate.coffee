@@ -107,7 +107,7 @@ go = (products) ->
   companyPayments = generateCompanyPayments(1000)
 
   # Generate company advanced_customer_entity
-  companyAdvancedCustomerEntity = generateCompanyAdvancedCustomerEntity(1000)
+  companyAdvancedCustomerEntity = generateCompanyAdvancedCustomerEntities(1000)
 
   # Generate company credit
   companyCredit = generateCompanyCredits(1000)
