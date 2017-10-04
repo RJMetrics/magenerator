@@ -98,7 +98,7 @@ go = (products) ->
   negotiableQuotes = generateNegotiableQuotes(1000)
 
   # Generate negotiable quote history
-  negotiableQuoteHistory = generateNegotiableQuoteHistory(1000)
+  negotiableQuoteHistory = generateNegotiableQuoteHistories(1000)
 
   # Generate negotiable quote comment
   negotiableQuoteComments = generateNegotiableQuoteComments(1000)
@@ -709,7 +709,7 @@ generateNegotiableQuote = (index) ->
 generateNegotiableQuoteHistories = (total) ->
   items = []
   for index in [0..total]
-    items.push(generateNegotiableQuoteHistorie(index))
+    items.push(generateNegotiableQuoteHistory(index))
   return items
 
 generateNegotiableQuoteHistory = (index) ->
