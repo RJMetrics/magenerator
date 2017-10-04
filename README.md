@@ -192,7 +192,8 @@ CREATE TABLE `quote` (
   `base_grand_total` decimal(12,4) DEFAULT '0.0000' COMMENT 'Base Grand Total',
   `checkout_method` varchar(255) DEFAULT NULL COMMENT 'Checkout Method',
   `customer_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Customer Id',
-  `coupon_code` varchar(255) DEFAULT NULL COMMENT 'Coupon Code'
+  `coupon_code` varchar(255) DEFAULT NULL COMMENT 'Coupon Code',
+  `reserved_order_id` varchar(64) DEFAULT NULL COMMENT 'Reserved Order Id'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sales Flat Quote';
 
 ```
