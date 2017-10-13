@@ -331,10 +331,10 @@ generateOrders = (total, customers, addresses, products, stores) ->
       customer_group_id: customer.group_id
       created_at: createdAt
       updated_at: createdAt
-      returned: orderReturned
-      quote_id: index
-      items: orderItems
       increment_id: index
+      quote_id: index
+      returned: orderReturned
+      items: orderItems
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
