@@ -14,7 +14,9 @@ ITEMS_MIN = 1
 ITEMS_MAX = 20
 TOTAL_STORES = 5
 TOTAL_COMPANIES = 20
-TOTAL_QUOTES = 1000
+TOTAL_QUOTES = 1000 # These are the number of quotes without orders
+TOTAL_NEGOTIABLE_QUOTES = 1000
+TOTAL_ADMIN_USERS = 10
 CUSTOMER_GROUPS_FILE = 'data/customer_group.csv'
 CUSTOMER_FILE = 'data/customer_entity.csv'
 PRODUCT_INPUT_FILE = 'data/products.csv'
@@ -77,11 +79,6 @@ go = (products) ->
   # Generate list of customers
   customers = generateCustomers(TOTAL_CUSTOMERS, stores)
 
-  # Generate list of quotes
-  qResult = generateQuotes(TOTAL_QUOTES, customers, products, stores)
-  quotes = qResult[0]
-  quoteItems = qResult[1]
-
   # Generate a list of addresses where they want to ship stuff (1-3 places per customer) and add them to the customers
   addresses = generateAddresses(TOTAL_ADDRESSES)
 
@@ -91,17 +88,22 @@ go = (products) ->
   # Make customers return some of the things :(
   returns = generateReturnsAndReturnItems(orders)
 
+  # Generate list of quotes
+  qResult = generateQuotes(TOTAL_QUOTES, customers, products, stores, orders)
+  quotes = qResult[0]
+  quoteItems = qResult[1]
+
   # Generate shared catalog
-  sharedCatalog = generateSharedCatalogs(5)
+  sharedCatalog = generateSharedCatalogs() # shared catalogs hardcoded
 
   # Generate negotiable quotes
-  negotiableQuotes = generateNegotiableQuotes(1000)
+  negotiableQuotes = generateNegotiableQuotes(TOTAL_NEGOTIABLE_QUOTES, quotes)
 
   # Generate negotiable quote history
-  negotiableQuoteHistory = generateNegotiableQuoteHistories(1000)
+  # negotiableQuoteHistory = generateNegotiableQuoteHistories(1000)
 
   # Generate negotiable quote comment
-  negotiableQuoteComments = generateNegotiableQuoteComments(1000)
+  # negotiableQuoteComments = generateNegotiableQuoteComments(1000)
 
   # Generate company payment
   companyPayments = generateCompanyPayments(1000)
@@ -113,7 +115,7 @@ go = (products) ->
   companyCredit = generateCompanyCredits(1000)
 
   # Generate company credit
-  adminUsers = generateAdminUsers(10)
+  adminUsers = generateAdminUsers(TOTAL_ADMIN_USERS)
 
   # Export all the data to CSV
   exportData(COMPANIES_FILE, companies, "Exporting company list... ")
@@ -131,8 +133,8 @@ go = (products) ->
 
   exportData(SHARED_CATALOG_FILE, sharedCatalog, "Exporting shared catalog...")
   exportData(NEGOTIABLE_QUOTE_FILE, negotiableQuotes, "Exporting negotiable quotes...")
-  exportData(NEGOTIABLE_QUOTE_HISTORY_FILE, negotiableQuoteHistory, "Exporting negotiable quote history...")
-  exportData(NEGOTIABLE_QUOTE_COMMENT_FILE, negotiableQuoteComments, "Exporting negotiable quote comment...")
+  # exportData(NEGOTIABLE_QUOTE_HISTORY_FILE, negotiableQuoteHistory, "Exporting negotiable quote history...")
+  # exportData(NEGOTIABLE_QUOTE_COMMENT_FILE, negotiableQuoteComments, "Exporting negotiable quote comment...")
   exportData(COMPANY_PAYMENT_FILE, companyPayments, "Exporting company payments...")
   exportData(
     COMPANY_ADVANCED_CUSTOMER_ENTITY_FILE, companyAdvancedCustomerEntity, "Exporting company advanced customer entity...")
@@ -329,7 +331,10 @@ generateOrders = (total, customers, addresses, products, stores) ->
       customer_group_id: customer.group_id
       created_at: createdAt
       updated_at: createdAt
+      increment_id: index
+      quote_id: index
       returned: orderReturned
+      items: orderItems
     orders.push(order)
     orderCounts[customer.entity_id] = if orderCounts[customer.entity_id] then orderCounts[customer.entity_id] + 1 else 1
   return orders
@@ -530,9 +535,21 @@ getRandomReturnDate = (startDate) ->
   returnMax.setDate(orderDate.getDate() + RETURN_PERIOD_DAYS)
   if (returnMax > today)
     returnMax = today
-  
-  min = orderDate.getTime()
-  max = returnMax.getTime()
+
+  getRandomDateBetween(orderDate, returnMax)
+
+  # min = orderDate.getTime()
+  # max = returnMax.getTime()
+
+  # date = new Date()
+  # rand = Math.round(Math.random() * (max - min) + min)
+  # date.setTime(rand)
+  # date.toISOString().slice(0, 19).replace('T', ' ');
+
+getRandomDateBetween = (start, end) ->
+
+  min = start.getTime()
+  max = end.getTime()
 
   date = new Date()
   rand = Math.round(Math.random() * (max - min) + min)
@@ -580,8 +597,8 @@ generateCompany = (id) ->
     region_id: null
     postcode: null
     telephone: null
-    customer_group_id: chance.integer({min:2,max:6})
-    sales_representative_id: null
+    customer_group_id: chance.integer({min:2,max:6}) # Reference to customer_group.customer_group_id
+    sales_representative_id: chance.integer({min:0,max:TOTAL_ADMIN_USERS}) # Reference to admin_user.user_id
     super_user_id: null
     reject_reason: null
     rejected_at: null
@@ -596,27 +613,94 @@ generateAdminUser = (index) ->
   item =
     user_id: index
     email: chance.email()
+    username: null
     is_active: 1
 
 generateCompanySuffix = () ->
   chance.pickone([".com", ".com", ".com", "", "", " LLC", " Party Ltd.", " GmbH", ".biz", "Co", " Co", "Corp"])
 
-generateQuotes = (total, customers, products, stores) ->
+generateQuotes = (total, customers, products, stores, orders) ->
   quotes = []
   quoteItems = []
-  for index in [0..total]
-    result = generateQuote(index, chance.pickone(customers).id, products, stores)
+
+  # Generate quotes from existing orders - all orders have a quote!
+  for order in orders
+    quotes.push(generateQuoteFromOrder(order))
+    quoteItems = quoteItems.concat(generateQuoteItemsFromOrderItems(order.items))
+
+  # Generate some quotes that don't turn into orders :(
+  total = orders.length + 1 + total
+  for index in [orders.length+1..total]
+    result = generateQuote(index, chance.pickone(customers), products, stores)
     quotes.push(result[0])
     quoteItems = quoteItems.concat(result[1])
+
   return [quotes, quoteItems]
 
-generateQuote = (id, customer_id, products, stores) ->
+generateQuoteItemsFromOrderItems = (items) ->
+  
+  quoteItems = []
+  for item in items
+    quoteItems.push(generateQuoteItemFromOrderItem(item))
+
+generateQuoteItemFromOrderItem = (item) ->
+  item =
+    item_id: item.item_id # Can make item id same as id
+    quote_id: item.order_id # This is guaranteed to be same as quote id for now
+    created_at: null
+    updated_at: null
+    product_id: item.product_id
+    store_id: null
+    is_virtual: chance.integer({min: 0, max: 1})
+    sku: item.sku
+    name: item.name
+    qty: item.qty_ordered
+    price: item.base_price
+    base_price: item.base_price
+    product_type: item.product_type
+
+generateQuoteFromOrder = (order) ->
+
+  orderDate = new Date(order.created_at)
+  minQuoteDate = new Date(orderDate)
+  maxQuoteDate = orderDate
+  if chance.bool({likelihood:66}) # 66% of quotes convert within an hour
+    minQuoteDate.setHours(orderDate.getHours() - 1)
+  else
+    if chance.bool({likelihood:50}) # 1/2 of remaining quotes convert between 1 and 5 hours
+      minQuoteDate.setHours(orderDate.getHours() - 5)
+      maxQuoteDate.setHours(orderDate.getHours() - 1)
+    else # remaining carts convert between 5 hours and 3 days
+      minQuoteDate.setHours(orderDate.getHours() - 72)
+      maxQuoteDate.setHours(orderDate.getHours() - 5)
+
+  quote =
+    entity_id: order.quote_id
+    store_id: null
+    created_at: getRandomDateBetween(minQuoteDate, maxQuoteDate)
+    updated_at: null
+    converted_at: null
+    is_active: null
+    is_virtual: null
+    is_multi_shipping: null
+    items_count: order.items.length
+    items_qty: order.items.length
+    grand_total: order.base_grand_total
+    base_grand_total: order.base_grand_total
+    checkout_method: null
+    customer_id: order.customer_id
+    coupon_code: null
+    reserved_order_id: order.increment_id
+    customer_email: order.customer_email
+    base_subtotal: null
+
+generateQuote = (id, customer, products, stores) ->
   total = chance.floating({min:1, max: 1000}).toFixed(2)
   items = generateQuoteItems(id, products, stores)
   quote =
     entity_id: id
     store_id: null
-    created_at: null
+    created_at: getRandomDate()
     updated_at: null
     converted_at: null
     is_active: null
@@ -627,8 +711,11 @@ generateQuote = (id, customer_id, products, stores) ->
     grand_total: total
     base_grand_total: total
     checkout_method: null
-    customer_id: customer_id
+    customer_id: customer.entity_id
     coupon_code: null
+    reserved_order_id: null
+    customer_email: customer.email
+    base_subtotal: null
 
   return [quote, items]
 
@@ -641,13 +728,14 @@ generateQuoteItems = (quote_id, products, stores) ->
   return items
 
 generateQuoteItem = (id, quote_id, product, store) ->
-  price = chance.floating({min: 1, max: 100}).toFixed()
+  price = chance.floating({min: 1, max: 10}).toFixed()
   item =
     item_id: id
     quote_id: quote_id
     created_at: null
     updated_at: null
     product_id: product.entity_id
+    store_id: store.entity_id
     is_virtual: chance.integer({min: 0, max: 1})
     sku: product.sku
     name: product.name
@@ -656,16 +744,17 @@ generateQuoteItem = (id, quote_id, product, store) ->
     base_price: price
     product_type: product.product_type
 
-generateSharedCatalogs = (total) ->
+generateSharedCatalogs = () ->
   items = []
-  for index in [0..total]
-    items.push(generateSharedCatalog(index))
+  sharedCatalogNames = ["Men's","Women's","Seasonal","5% off","10% off","Standard"]
+  for name, index in sharedCatalogNames
+    items.push(generateSharedCatalog(name, index))
   return items
 
-generateSharedCatalog = (index) ->
+generateSharedCatalog = (name, index) ->
   item =
     entity_id: index
-    name: chance.word()
+    name: name
     description: chance.word()
     customer_group_id: chance.integer({min:1,max:10})
     type: chance.integer({min:0,max:0})
@@ -673,17 +762,18 @@ generateSharedCatalog = (index) ->
     created_by: chance.integer({min:0,max:10000})
     store_id: chance.integer({min:0,max:10})
 
-generateNegotiableQuotes = (total) ->
+generateNegotiableQuotes = (total, quotes) ->
+  quotes = chance.pickset(quotes, total) # pick quotes to be negotiable
   items = []
-  for index in [0..total]
-    items.push(generateNegotiableQuote(index))
+  for quote in quotes
+    items.push(generateNegotiableQuote(quote))
   return items
 
-generateNegotiableQuote = (index) ->
+generateNegotiableQuote = (quote) ->
   item =
-    quote_id: index
+    quote_id: quote.entity_id
     is_regular_quote: 0
-    status: ''
+    status: chance.weighted(['Submitted by customer','Processing by admin','Ordered','Expired','Declined'],[18,15,50,10,7])
     quote_name: chance.word()
     negotiated_price_type: chance.integer({min:0,max:10})
     negotiated_price_value: chance.floating({min: 0, max: 1000})
@@ -699,12 +789,12 @@ generateNegotiableQuote = (index) ->
     is_address_draft: 0
     deleted_sku: ''
     creator_type: 3
-    creator_id: chance.integer({min:1,max:1000})
+    creator_id: chance.integer({min:1,max:TOTAL_CUSTOMERS})
     original_total_price: chance.floating({min:0,max:1000})
     base_original_total_price: chance.floating({min:0,max:1000})
     negotiated_total_price: chance.floating({min:0,max:1000})
     base_negotiated_total_price: chance.floating({min:0,max:1000})
-    reserved_order_id: chance.integer({min:1,max:1000})
+    # reserved_order_id: chance.integer({min:1,max:1000})
 
 generateNegotiableQuoteHistories = (total) ->
   items = []
@@ -761,7 +851,7 @@ generateCompanyAdvancedCustomerEntities = (total) ->
 
 generateCompanyAdvancedCustomerEntity = (index) ->
   item =
-    customer_id: chance.integer({min:1,max:1000})
+    customer_id: chance.integer({min:1,max:TOTAL_CUSTOMERS}) # Reference to customer_entity.entity_id
     company_id:  chance.integer({min:1,max:1000})
     job_title: chance.word()
     status: ''
@@ -776,7 +866,7 @@ generateCompanyCredits = (total) ->
 generateCompanyCredit = (index) ->
   item =
     enity_id: index
-    company_id: chance.integer({min:1,max:1000})
+    company_id: chance.integer({min:1,max:TOTAL_COMPANIES}) # Reference to company.entity_id
     credit_limit: chance.floating({min:0,max:10000})
     balance: chance.floating({min:0,max:10000})
     currency_code: chance.currency().code
